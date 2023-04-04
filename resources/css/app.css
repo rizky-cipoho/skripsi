@@ -1,0 +1,18 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer utilities {
+	.textlimit{
+		--max-lines: 2;
+
+		display: -webkit-box;
+		overflow: hidden;
+		-webkit-box-orient: vertical;
+		-webkit-line-clamp: var(--max-lines);
+	}
+	@font-face{
+		font-family: grek;
+		scr: url('/font/Gloock-Regular.ttf');
+	}
+}
