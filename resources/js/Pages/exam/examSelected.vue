@@ -43,11 +43,14 @@
 							<div class="">
 								<div class="flex">
 									<BookOutline class="w-4 text-red-600" />
-									<small class="px-2">{{ props.historyCount }} Dikerjakan</small>
+									<small class="px-2"
+										>{{ props.historyCount }} Dikerjakan</small
+									>
 								</div>
 								<div class="flex">
 									<BookOutline class="w-4 text-red-600" />
-									<small class="px-2">asdsadas</small>
+									<small class="px-2" v-show="examData.lesson.lesson == 'Lainnya'">{{ examData.lesson.lesson }} ({{ examData.other }})</small>
+									<small class="px-2" v-show="examData.lesson.lesson != 'Lainnya'">{{ examData.lesson.lesson }}</small>
 								</div>
 							</div>
 							<div class="">
@@ -65,7 +68,7 @@
 				</div>
 				<div class="grid grid-cols-2 flex justify-between mt-4 gap-3">
 					<Link
-						href=""
+						:href="route('questionEdit', examData.id)"
 						as="button"
 						class="shadow justify-center bg-red-600 text-white py-1 mt-2 px-2 rounded font-semibold hover:bg-gray-700 focus:outline-none tracking-widest active:bg-red-600 focus:shadow-outline-gray transition ease-in-out duration-150 inline-flex block mb-1"
 					>
@@ -105,22 +108,57 @@
 
 			<Question />
 		</div>
+
 		<div class="text-center w-3/12">
 			<div>
 				<p class="font-bold text-lg">Pelajaran</p>
-				<div class="h-44 overflow-y-scroll my-4" >
-					<form>
-						<div class="flex items-center hover:bg-gray-100 cursor-pointer px-3 rounded" v-for="(lesson,index) in props.lesson">
-							<input type="radio" :id="lesson.id" name="lesson" class="w-4 cursor-pointer" :value="lesson.id" v-model="selected" />
-							<label class="px-2 w-full py-2 cursor-pointer text-left select-none" :for="lesson.id">{{ lesson.lesson }}</label>
-						</div>
-					</form>
+				<form>
+				<div class="h-44 overflow-y-scroll my-4">
+					<div
+						class="flex items-center hover:bg-gray-100 cursor-pointer px-3 rounded"
+						v-for="(lesson, index) in props.lesson"
+					>
+						<input
+							type="radio"
+							:id="lesson.id"
+							name="lesson"
+							class="w-4 cursor-pointer"
+							:value="lesson.id"
+							v-model="selected"
+						/>
+						<label
+							class="px-2 w-full py-2 cursor-pointer text-left select-none"
+							:for="lesson.id"
+							>{{ lesson.lesson }}</label
+						>
+					</div>
 				</div>
-				<div class="flex items-center hover:bg-gray-100 cursor-pointer px-3 rounded">
-					<input type="radio" :id="props.lessonOther.id" name="lesson" class="w-4 cursor-pointer" :value="props.lessonOther.id" v-model="selected" />
-							<label class="px-2 w-full py-2 cursor-pointer text-left select-none" :for="props.lessonOther.id">{{ props.lessonOther.lesson }}</label>
-							<input type="" name="" class="w-36 border-b-2 border-gray-700 active:border-0 focus:border-0 rounded" v-model="other">
+				<div
+					class="flex items-center hover:bg-gray-100 cursor-pointer px-3 rounded"
+				>
+					<input
+						type="radio"
+						:id="props.lessonOther.id"
+						name="lesson"
+						class="w-4 cursor-pointer"
+						:value="props.lessonOther.id"
+						v-model="selected"
+					/>
+					<label
+						class="px-2 w-full py-2 cursor-pointer text-left select-none"
+						:for="props.lessonOther.id"
+						>{{ props.lessonOther.lesson }}</label
+					>
+					<input
+						type=""
+						name=""
+						class="w-36 border-b-2 border-gray-700 active:border-0 focus:border-0 rounded"
+						@click="examlessonChange = !examlessonChange"
+						v-model="other"
+						readonly
+					/>
 				</div>
+				</form>
 			</div>
 			<div>
 				<p class="text-lg font-bold py-5">Rekomendasi</p>
@@ -134,15 +172,15 @@
 	</div>
 	<ModalExamChange
 		:show="examNameChange"
-		@changeExam="changeExam"
+		@changeInput="changeExam"
 		@closeModal="closeModal"
 		:pending="examNamePending"
 		:input="examName"
-		:title="'Masukkan Nama Ujian'"
+		:title="'Ubah Nama Ujian'"
 	/>
-		<ModalExamChange
+	<ModalExamChange
 		:show="examlessonChange"
-		@selectedLesson="selectedLesson"
+		@changeInput="selectedLesson"
 		@closeModal="closeModal"
 		:pending="selectedLessonPending"
 		:input="other"
@@ -183,9 +221,8 @@ const props = defineProps({
 	exam: Object,
 	recommendations: Object,
 	historyCount: Number,
-	lessonOther: Object
+	lessonOther: Object,
 });
-console.log(props.historyCount);
 onMounted(() => {
 	chartData.value = setChartData();
 });
@@ -226,10 +263,7 @@ const notificationStatus = () => {
 	notificationExamNameChange.value = false;
 };
 watch(notification, () => {
-	if (
-		notification.value == true ||
-		notificationExamNameChange.value == true
-	) {
+	if (notification.value == true || notificationExamNameChange.value == true) {
 		setTimeout(() => {
 			notification.value = false;
 			notificationExamNameChange.value = false;
@@ -245,10 +279,7 @@ examData.value = props.exam;
 const examNamePending = ref(false);
 const examName = ref("");
 watch(notificationExamNameChange, () => {
-	if (
-		notification.value == true ||
-		notificationExamNameChange.value == true
-	) {
+	if (notification.value == true || notificationExamNameChange.value == true) {
 		setTimeout(() => {
 			notification.value = false;
 			notificationExamNameChange.value = false;
@@ -283,42 +314,76 @@ const changeExam = (val) => {
 		});
 };
 
-const other = ref("")
-const selectedLessonPending = ref(false)
+
+const other = ref(examData.value.other);
+const selectedLessonPending = ref(false);
 const closeModal = () => {
 	examNameChange.value = false;
+	examlessonChange.value = false;
 };
-const examlessonChange = ref(false)
-const selected = ref(props.exam.lesson_id)
-const selectedLesson = () => {
-	selected.value = val;
-	selectedLessonPending.value = true;
-	if (selected.value == props.lessonOther.id) {
+const examlessonChange = ref(false);
+const selected = ref(props.exam.lesson_id);
+
+watch(selected, () => {
+	selected.value = selected.value
+	selectedLesson();
+});
+
+const selectedLesson = (val) => {
+	other.value = val;
+console.log(other.value)
+	if ((typeof other.value === "object" || other.value === undefined) == false) {
+		selected.value = props.lessonOther.id;
+		selectedLessonPending.value = true;
 		axios
 		.get(route("changeExamLesson", props.exam.id), {
-			params: {
-				id: selected.value,
-				other: other.value,
-			},
-		})
-		.then((result) => {
-			selectedLessonPending.value = false;
-			examNameChange.value = false;
-			examData.value = null;
-			examData.value = result.data;
-			notificationExamNameChangeSign.value = "checklist";
-			notificationExamNameChangeText.value = "Pelajaran Berhasil Diubah";
-			notificationExamNameChange.value = true;
-		})
-		.catch((result) => {
-			examNamePending.value = false;
-			examNameChange.value = false;
-			notificationExamNameChangeSign.value = "error";
-			notificationExamNameChangeText.value = "Pelajaran gagal Diubah";
-			notificationExamNameChange.value = true;
-		});
+				params: {
+					id: selected.value,
+					other: other.value,
+				},
+			})
+			.then((result) => {
+				selectedLessonPending.value = false;
+				examlessonChange.value = false;
+				examData.value = null;
+				examData.value = result.data;
+				notificationExamNameChangeSign.value = "checklist";
+				notificationExamNameChangeText.value = "Pelajaran Berhasil Diubah";
+				notificationExamNameChange.value = true;
+			})
+			.catch((result) => {
+				examNamePending.value = false;
+				examlessonChange.value = false;
+				notificationExamNameChangeSign.value = "error";
+				notificationExamNameChangeText.value = "Pelajaran gagal Diubah";
+				notificationExamNameChange.value = true;
+			});
+	} else {
+		axios
+			.get(route("changeExamLesson", props.exam.id), {
+				params: {
+					id: selected.value,
+					other: null,
+				},
+			})
+			.then((result) => {
+				selectedLessonPending.value = false;
+				examlessonChange.value = false;
+				examData.value = null;
+				examData.value = result.data;
+				console.log(examData.value);
+				notificationExamNameChangeSign.value = "checklist";
+				notificationExamNameChangeText.value = "Pelajaran Berhasil Diubah";
+				notificationExamNameChange.value = true;
+			})
+			.catch((result) => {
+				examNamePending.value = false;
+				examlessonChange.value = false;
+				notificationExamNameChangeSign.value = "error";
+				notificationExamNameChangeText.value = "Pelajaran gagal Diubah";
+				notificationExamNameChange.value = true;
+			});
 	}
-	
 };
 </script>
 <style>

@@ -17,6 +17,7 @@ return new class extends Migration
             $table->string('id')->primary();
             $table->string('exam');
             $table->integer('lesson_id');
+            $table->string('other')->nullable();
             $table->string('uni_code')->unique();
             $table->text('description')->nullable();
             $table->integer('user_id');

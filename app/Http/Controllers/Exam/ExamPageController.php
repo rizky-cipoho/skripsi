@@ -8,6 +8,8 @@ use App\Models\Exam;
 use App\Traits\ExamTrait;
 use App\Models\Lesson;
 use App\Models\History;
+use App\Models\Question;
+use App\Models\QuestionData;
 use App\Models\Exam_Attachment;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Requests\ExamRequest;
@@ -56,11 +58,19 @@ class ExamPageController extends Controller
             'type'=>".jpg",
             'image' => "/image/rasberry.jpg",
         ]);
+        $question = Question::create([
+            'exam_id'=>$add->id
+        ]);
+                $questionData = QuestionData::create([
+            'question_id'=>$question->id,
+            'type'=>'paragraph',
+            'data'=>""
+        ]);
         $get = Exam::where('user_id', Auth::user()->id)->with('attachment')->with('lesson')->orderBy('id', 'DESC')->get();
         return $get;
     }
     public function selected($id){
-        $exam = Exam::find($id);
+        $exam = Exam::with('lesson')->find($id);
         $recomendation = $this->recommendations();
         $lessonNotIn = collect(['Lainnya']);
         $lesson = Lesson::whereNotIn('lesson', $lessonNotIn)->get();
@@ -86,13 +96,24 @@ class ExamPageController extends Controller
         return $now;
     }
     public function changeExamLesson(ExamRequest $request, $id){
-        $request->validate([
-            'examName'=>'required'
-        ]);
-        $update = Exam::find($id)->update([
-            'exam'=>$request->examName
-        ]);
-        $now = Exam::find($id);
-        return $now;
+        $lesson = Lesson::find($request->id);
+        if ($request->other != null && $lesson->lesson == 'Lainnya') {
+            $request->validate([
+                'other'=>'required'
+            ]);
+            $updateExam = Exam::find($id)->update([
+                'lesson_id'=>$request->id,
+                'other'=>$request->other
+            ]);
+            $now = Exam::with('lesson')->find($id);
+            return $now;
+        }else{
+            $updateExam = Exam::find($id)->update([
+                'lesson_id'=>$request->id,
+                'other'=>null,
+            ]);
+            $now = Exam::with('lesson')->find($id);
+            return $now;
+        }
     }
 }

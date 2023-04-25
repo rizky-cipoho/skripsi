@@ -93,7 +93,6 @@
 import Navbar from "@/Components/navbar.vue";
 import { Head, Link, useForm, router } from "@inertiajs/inertia-vue3";
 import { ref, watch, computed } from "vue";
-
 import { BookmarksSharp, DocumentTextOutline } from "@vicons/ionicons5";
 import Modal from "@/Components/modal/modal.vue";
 import ModalLink from "@/Components/modal/modalLink.vue";

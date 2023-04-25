@@ -16,7 +16,7 @@ export default defineConfig({
                     includeAbsolute: false,
                 },
             },
-        }) 
+        }) ,
     ],
     // server:{
     //         host: true

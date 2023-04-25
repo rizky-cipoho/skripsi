@@ -10,7 +10,7 @@ class Exam extends Model
 {
     use HasFactory;
     use HasUlids;
-    protected $fillable = ['exam', 'lesson_id','user_id', 'uni_code', 'description'];
+    protected $fillable = ['exam', 'lesson_id','user_id', 'uni_code', 'description', 'other'];
     public function attachment(){
         return $this->hasOne(Exam_attachment::class, 'exam_id');
     }

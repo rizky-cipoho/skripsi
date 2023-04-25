@@ -14,9 +14,9 @@ return new class extends Migration
     public function up()
     {
         Schema::create('questions', function(Blueprint $table){
-            $table->id();
-            $table->string('question');
-            $table->integer('exam_id');
+            $table->string('id')->primary();
+            $table->string('exam_id');
+            $table->string('remove')->nullable();
             $table->timestamps();
         });
     }

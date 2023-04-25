@@ -22,7 +22,6 @@
         <ModalExam
             :show="isOpen"
             :examName="examName"
-            :lessons="props.lessons"
             style="z-index: 9999"
             @closeModal="closeModal"
             @add="add"
@@ -57,13 +56,11 @@ exams.value.push(...props.exams);
 
 const add = (exam, lesson) => {
     examName.value = exam;
-    lessonNumber.value = lesson;
     pending.value = true;
     axios
         .get(route("examAdd"), {
             params: {
-                examName: examName.value,
-                lesson: lessonNumber.value,
+                examName: examName.value
             },
         })
         .then(function (val) {
@@ -72,7 +69,9 @@ const add = (exam, lesson) => {
             exams.value.push(...val.data);
             isOpen.value = false;
             message.value = "Ujian Berhasil Dibuat"
-            messageActive.value = true;
+            // messageActive.value = true;
+            // setTimeout(()=>messageActive.value = true, 1500)
+            
         })
         .catch(function (val) {
             pending.value = false;
