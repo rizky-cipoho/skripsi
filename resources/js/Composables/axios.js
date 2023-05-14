@@ -1,19 +1,14 @@
-import {ref} from 'vue'
+import { ref } from "vue";
 
-export default function axios(route, params, routeParams){
+export function axiosComposable(val) {
 	const data = ref([]);
+	axios
+		.post(route(val.route, val.routeParams), {
+			params: val.params,
+		})
+		.then((output) => {
+			data.value.push(...output.data);
+		});
 
-	axios.post(route(route), {
-		params:{
-			params: params
-		}
-	})
-	.then((output)=>{
-
-	})
-	.catch(()=>{
-
-	});
-
-	return { data }
+	return { data };
 }

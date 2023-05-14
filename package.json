@@ -35,12 +35,11 @@
         "@tinymce/tinymce-vue": "^5.1.0",
         "chart.js": "^4.2.1",
         "daisyui": "^2.42.0",
+        "debounce": "^1.2.1",
+        "editorjs-text-alignment-blocktune": "^1.0.3",
+        "lodash.debounce": "^4.0.8",
         "primeicons": "^6.0.1",
         "primevue": "^3.26.1",
-        "quill": "^1.3.7",
-        "quill-image-resize-module": "^3.0.0",
-        "quill-image-resize-vue": "^1.0.4",
-        "vue-editor-js": "^2.0.2",
-        "vueperslides": "^3.5.1"
+        "vue-debounce": "^4.0.0"
     }
 }

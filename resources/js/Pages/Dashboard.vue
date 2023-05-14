@@ -5,7 +5,9 @@
             <div
                 class="shadow px-5 py-5 bg-white md:flex md:flex-warp md:w-9/12 rounded"
             >
-                <div class="md:w-6/12 flex max-md:justify-center items-center px-5 max-md:py-5">
+                <div
+                    class="md:w-6/12 flex max-md:justify-center items-center px-5 max-md:py-5"
+                >
                     <img src="/image/loli.png" class="rounded-full w-24 h-24" />
                     <div class="ml-3 pl-3">
                         <p class="leading-8 text-sm">
@@ -72,11 +74,24 @@
                 </div>
             </div>
         </div>
-        <RowExamRecommendation :recommendationsData="recommendationsData" :favorite="props.favorite" />
+        <RowExamRecommendation
+            :recommendationsData="recommendationsData"
+            :favorite="props.favorite"
+        />
         <RowExam v-for="seconds in props.seconds" :seconds="seconds" />
         <Modal :show="isOpen" @closeModal="closeModal" />
-        <ModalLink :show="isOpenLink" :search="search" :link="link" @closeModal="closeModal" />
-        <ModalAlert :show="isOpenAlert" :search="search" :message="message" @closeModal="closeModal" />
+        <ModalLink
+            :show="isOpenLink"
+            :search="search"
+            :link="link"
+            @closeModal="closeModal"
+        />
+        <ModalAlert
+            :show="isOpenAlert"
+            :search="search"
+            :message="message"
+            @closeModal="closeModal"
+        />
     </div>
     <button @click="check">
         Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
@@ -119,7 +134,6 @@ const isOpenAlert = ref(false);
 const search = ref("");
 
 // let aa = window.addEventListener("blur", function(){
-//   console.log("bener blur");
 // });
 // document.fullScreenElement != null
 let open = ref(false);
@@ -128,33 +142,31 @@ const input = ref({
 });
 
 let cardData = ref([]);
-const recommendationsData = ref([])
-const dataReverse = ()=>{
-    return new Promise(result =>{
+const recommendationsData = ref([]);
+const dataReverse = () => {
+    return new Promise((result) => {
         result(recommendationsData.value.push(...props.recommendations));
     });
-}
+};
 watch(
     recommendationsData.value,
     () => {
-
         recommendationsData.value = [];
         const reverse = dataReverse();
-        reverse.then((arr)=>recommendationsData.value.slice(1,4).reverse())
+        reverse.then((arr) => recommendationsData.value.slice(1, 4).reverse());
     },
     {
         immediate: true,
     }
 );
-const closeModal = (val)=> {
+const closeModal = (val) => {
     if (val != null) {
-    search.value = val.value;
-
+        search.value = val.value;
     }
     isOpen.value = false;
     isOpenAlert.value = false;
     isOpenLink.value = false;
-}
+};
 function openModal() {
     isOpen.value = true;
 }
@@ -172,7 +184,7 @@ const searchAxios = function () {
         .then(function (val) {
             if (val.data.message == undefined) {
                 pending.value = false;
-                link.value = link.value+val.data.id;
+                link.value = link.value + val.data.id;
                 isOpenLink.value = true;
             } else {
                 pending.value = false;

@@ -19,5 +19,10 @@ class PointsSeeder extends Seeder
             'point' => 1000,
             'user_id' => 1
         ]);
+                \App\Models\Point::create([
+            'id' => 2,
+            'point' => 1000,
+            'user_id' => 2
+        ]);
     }
 }

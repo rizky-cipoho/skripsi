@@ -14,7 +14,7 @@ return new class extends Migration
     public function up()
     {
         Schema::create('exam_attachments', function(Blueprint $table){
-            $table->id();
+            $table->string('id')->primary();
             $table->string('filename');
             $table->string('path');
             $table->string('type');

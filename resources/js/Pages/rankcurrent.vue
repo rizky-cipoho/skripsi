@@ -9,7 +9,6 @@ const input = ref({
 
 function add(){
   // d.preventDefault();
-  // console.log(input.value.search);
   
 }
 function numberFormat(n){

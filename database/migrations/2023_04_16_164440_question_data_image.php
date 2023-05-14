@@ -19,6 +19,7 @@ return new class extends Migration
             $table->string('path');
             $table->string('type');
             $table->integer('size');
+            $table->string('withBackground');
             $table->timestamps();
         });
     }

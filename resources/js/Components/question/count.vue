@@ -1,14 +1,16 @@
 <template>
-	<div class="w-3/12 px-3 py-3 rounded" style="">
-		<button
-			class="btn w-full mb-2 border-none bg-gradient-to-r from-red-600 to-gray-700 hover:from-gray-700"
-			@click="saveQuestion"
-		>
-			Save
-		</button>
-		<div class="flex grid grid-cols-2 gap-2 mb-5">
+	<div class="md:w-3/12 pl-10 py-3 rounded" style="">
+		<Problem :problem="props.problem" />
+		<div class="flex items-center">
+			<p>pilihan</p>
+			<div v-for="i in 5" class="p-2">
+				<button class="px-2 py-1 border border-gray-400 rounded hover:bg-gray-700 hover:text-white font-semibold" :class="{ 'bg-red-600 text-white border-none': props.exam.choice == i+1 }" :disabled="props.exam.choice == i+1" @click="triggerModal(i+1)" v-text="i+1">
+				</button>
+			</div>
+		</div>
+		<div class="flex grid grid-cols-2 gap-2">
 			<button
-				class="btn w-full bg-red-600 border-none"
+				class="btn w-full bg-red-600 border-none mb-5"
 				@click="addQuestion"
 			>
 				Tambah Soal
@@ -21,10 +23,17 @@
 				Hapus Soal
 			</button>
 		</div>
-		<div class="overflow-scroll overflow-x-hidden max-h-[30rem] px-3">
-			<div class="flex grid grid-cols-4 gap-3">
+
+		<div
+			class="overflow-auto overflow-x-hidden max-md:max-h-[26rem] px-3"
+			:class="[
+				{ 'md:max-h-[7rem]': 0 < props.problem.length },
+				{ 'md:max-h-[18rem]': 0 == props.problem.length },
+			]"
+		>
+			<div class="flex grid md:grid-cols-4 max-md:grid-cols-5 gap-3">
 				<button
-					class="btn btn-outline active:border-gray-600"
+					class="btn btn-outline active:border-gray-600 border border-gray-300"
 					v-for="(data, index) in props.questions"
 					:key="index"
 					:class="
@@ -36,36 +45,64 @@
 				</button>
 			</div>
 		</div>
+		<Modal :show="modal" :choice="choice" @accept="lengthChoice" @decline="decline" style="z-index: 99999;"/>
 	</div>
 </template>
 <script type="text/javascript" setup>
+import Problem from "@/Components/myExam/problem.vue";
+import Modal from "@/Components/modal/modalBool.vue";
 import { ref, watch, toRef } from "vue";
 const props = defineProps({
 	questions: Object,
+	problem: Object,
 	selected: Number,
+	exam: Object,
 });
+console.log(props.questions.length);
+const modal = ref(false)
+let choice = ref(props.exam.choice)
+function triggerModal(val){
+	choice.value = val
+	modal.value = true
+}
 const emit = defineEmits([
 	"addQuestion",
 	"removeQuestion",
 	"selected",
-	"saveQuestion",
+	"questionPush",
+	"examPush"
 ]);
-// console.log(1 == false);
+let remove = ref(false);
 
 const questionsToRef = toRef(props, "questions");
-watch(questionsToRef, ()=>{
+watch(questionsToRef, () => {
 	if (questionsToRef.value.length == 1) {
 		remove.value = true;
-	}else{
+	} else {
 		remove.value = false;
 	}
-})
+}, { immediate: true });
 
-
-const remove = ref(false);
 
 const addQuestion = () => emit("addQuestion");
 const removeQuestion = () => emit("removeQuestion");
-const saveQuestion = () => emit("saveQuestion");
+const questionPush = () => emit("questionPush");
 const selectedQuestion = (index, id) => emit("selected", { index, id });
+function lengthChoice(val){
+	axios.post(route("choiceLength", props.exam.id),{
+		length: val,
+		questions: props.questions[props.selected].id
+	})
+	.then((output)=>{
+		emit('questionPush', output.data)
+		emit('examPush', output.data.exam)
+		console.log(output.data);
+	})
+	modal.value = false
+
+}
+function decline (){
+	modal.value = false
+	console.log("asdasd");
+}
 </script>

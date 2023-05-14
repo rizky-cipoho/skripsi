@@ -14,7 +14,7 @@ return new class extends Migration
     public function up()
     {
         Schema::create('points', function(Blueprint $table){
-            $table->id();
+            $table->string('id')->primary();
             $table->integer('point');
             $table->integer('user_id');
             $table->timestamps();

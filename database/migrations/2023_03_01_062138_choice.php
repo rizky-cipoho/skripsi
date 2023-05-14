@@ -14,9 +14,11 @@ return new class extends Migration
     public function up()
     {
         Schema::create('choices', function(Blueprint $table){
-            $table->id();
-            $table->string('choice');
-            $table->integer('exam_id');
+            $table->string('id')->primary();
+            $table->string('choice')->nullable();
+            $table->string('question_id');
+            $table->string('choice_attachment')->nullable();
+            $table->string('remove')->nullable();
             $table->timestamps();
         });
     }

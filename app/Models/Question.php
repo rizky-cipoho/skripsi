@@ -16,5 +16,8 @@ class Question extends Model
     public function questionData(){
         return $this->hasMany(QuestionData::class, 'question_id');
     }
+    public function choice(){
+        return $this->hasMany(Choice::class, 'question_id');
+    }
 
 }

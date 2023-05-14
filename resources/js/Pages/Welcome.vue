@@ -1,32 +1,4 @@
-<script setup>
-import { Head, Link } from '@inertiajs/inertia-vue3';
 
-defineProps({
-    canLogin: Boolean,
-    canRegister: Boolean,
-    laravelVersion: String,
-    phpVersion: String,
-});
-let image = 'image/leaves.png';
-const imageArr = [
-{image: 'image/double-bubble-outline.png'},
-{image: 'image/moroccan-flower.png'},
-{image: 'image/dot.png'},
-{image: 'image/terrazo.png'},
-{image: 'image/tic-tac-toe.png'},
-{image: 'image/wavy.png'},
-{image: 'image/waves.png'},
-{image: 'image/memphis.png'},
-{image: 'image/funky-lines.png'},
-]
-
-function rand(){
-    let rand = Math.floor(Math.random() * imageArr.length);
-    console.log();
-    image = imageArr[rand].image;
-}
-rand();
-</script>
 
 <template>
     <div class="grid h-screen place-items-center" :style="{'background-image': 'url('+image+')'}">
@@ -53,3 +25,31 @@ rand();
         </div>
     </div>
 </template>
+<script setup>
+import { Head, Link } from '@inertiajs/inertia-vue3';
+
+defineProps({
+    canLogin: Boolean,
+    canRegister: Boolean,
+    laravelVersion: String,
+    phpVersion: String,
+});
+let image = 'image/leaves.png';
+const imageArr = [
+{image: 'image/double-bubble-outline.png'},
+{image: 'image/moroccan-flower.png'},
+{image: 'image/dot.png'},
+{image: 'image/terrazo.png'},
+{image: 'image/tic-tac-toe.png'},
+{image: 'image/wavy.png'},
+{image: 'image/waves.png'},
+{image: 'image/memphis.png'},
+{image: 'image/funky-lines.png'},
+]
+
+function rand(){
+    let rand = Math.floor(Math.random() * imageArr.length);
+    image = imageArr[rand].image;
+}
+rand();
+</script>

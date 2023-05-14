@@ -14,7 +14,7 @@ return new class extends Migration
     public function up()
     {
         Schema::create('histories', function(Blueprint $table){
-            $table->id();
+            $table->string('id')->primary();
             $table->string('exam_id');
             $table->integer('user_id');
             $table->timestamps();

@@ -18,7 +18,10 @@ return new class extends Migration
             $table->string('exam');
             $table->integer('lesson_id');
             $table->string('other')->nullable();
+            $table->integer('choice');
             $table->string('uni_code')->unique();
+            $table->string('key')->nullable();
+            $table->string('time_id');
             $table->text('description')->nullable();
             $table->integer('user_id');
             $table->timestamps();

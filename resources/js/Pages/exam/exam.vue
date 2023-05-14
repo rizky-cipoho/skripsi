@@ -19,6 +19,10 @@
             <MyExam v-for="(exam, index) in exams" :exam="exam" />
             
         </div>
+        <div class="text-center w-full select-none" v-if="exams.length == 0">
+                <label class="text-3xl font-black text-gray-400">Ujian Anda Kosong</label>
+                <!-- <label class="text-3xl font-black text-gray-400">{{ props.exams.length }}</label> -->
+            </div>
         <ModalExam
             :show="isOpen"
             :examName="examName"
@@ -36,7 +40,7 @@ import MyExam from "@/Components/myExam/index.vue";
 import ModalExam from "@/Components/modal/modalExam.vue";
 import ModalAlert from "@/Components/modal/modalAlert.vue";
 import { router } from "@inertiajs/inertia-vue3";
-import { ref, watch, computed } from "vue";
+import { ref, watch, computed, toRef } from "vue";
 
 const props = defineProps({
     exams: Object,
@@ -44,7 +48,6 @@ const props = defineProps({
     ziggy: Object,
     auth: Object
 });
-// console.log(props.exams )
 const isOpen = ref(false);
 const pending = ref(false);
 const messageActive = ref(false);

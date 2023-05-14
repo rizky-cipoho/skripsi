@@ -14,9 +14,9 @@ return new class extends Migration
     public function up()
     {
         Schema::create('answers', function(Blueprint $table){
-            $table->id();
+            $table->string('id')->primary();
             $table->string('choice_id');
-            $table->string('exam_id');
+            $table->string('history_question_id');
             $table->integer('user_id');
             $table->timestamps();
         });

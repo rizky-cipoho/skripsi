@@ -1,8 +1,9 @@
 <template>
 	<div
 		id="editorjs"
-		class="h-fit border border-gray-300 shadow-md rounded-xl py-10"
+		class="border border-gray-300 rounded-lg py-10 max-md:px-5"
 	></div>
+	<!-- <button @click="check">check</button> -->
 </template>
 <script type="text/javascript" setup>
 import EditorJS from "@editorjs/editorjs";
@@ -11,11 +12,22 @@ import Checklist from "@editorjs/checklist";
 import ImageTool from "@editorjs/image";
 import { ref, watch, toRef } from "vue";
 import { router } from "@inertiajs/inertia-vue3";
+import SimpleImage from "@/Composables/blockToolsImage.js";
+import AlignmentTuneTool from "editorjs-text-alignment-blocktune";
 
-const emit = defineEmits(["pendingSave", "removeQuestion"]);
+const emit = defineEmits([
+	"pendingSave",
+	"removeQuestionApplyData",
+	"questionsEmit",
+	"pendingNoEffect",
+]);
 function pending() {
 	emit("pendingSave");
 }
+function pendingNoEffect() {
+	emit("pendingNoEffect");
+}
+
 const props = defineProps({
 	exam: Object,
 	selected: Number,
@@ -25,8 +37,8 @@ const props = defineProps({
 	removeQuestion: Number,
 	selectedTrigger: Number,
 });
-console.log(props.questions);
-
+// console.log(props.questions);
+// console.log('atas');
 const dataPropsQuestions = ref([...props.questions]);
 let data = ref([
 	{
@@ -34,75 +46,81 @@ let data = ref([
 		blocks: [],
 	},
 ]);
-// console.log(dataPropsQuestions.value[props.selected].question_data[0])
-if (dataPropsQuestions.value[props.selected].question_data[0] != undefined) {
-	data.value[0].question_id = "";
-	data.value[0].blocks = [];
-	data.value[0].question_id =
-		dataPropsQuestions.value[props.selected].question_data[0].question_id;
-	for (let dataText in dataPropsQuestions.value[props.selected].question_data) {
-		if (
-			dataPropsQuestions.value[props.selected].question_data[dataText].type ==
-			"image"
-		) {
-			data.value[0].blocks.push({
-				type: dataPropsQuestions.value[props.selected].question_data[dataText]
-					.type,
-				id: dataPropsQuestions.value[props.selected].question_data[dataText].id,
-				data: {
-					file: {
-						url:
-							dataPropsQuestions.value[props.selected].question_data[dataText]
-								.question_attachment.path +
-							dataPropsQuestions.value[props.selected].question_data[dataText]
-								.question_attachment.filename,
-					},
-				},
-			});
-		} else {
-			data.value[0].blocks.push({
-				type: dataPropsQuestions.value[props.selected].question_data[dataText]
-					.type,
-				id: dataPropsQuestions.value[props.selected].question_data[dataText].id,
-				data: {
-					text: dataPropsQuestions.value[props.selected].question_data[dataText]
-						.data,
-				},
-			});
-		}
-	}
-} else {
-	data.value[0].blocks.push({
-		id: "",
-		type: "paragraph",
-		data: {
-			text: "",
-		},
-	});
-}
 
 const csrfToken = document
 	.querySelector('meta[name="csrf-token"]')
 	.getAttribute("content");
+// 	class MyImageTool extends ImageTool {
+//   renderSettings() {
+//     const div = document.createElement('div');
+//     div.style.marginTop = '-6px';
+//     return div;
+//   }
+// }
 const editor = new EditorJS({
 	holder: "editorjs",
 	tools: {
-		header: Header,
+		header: {
+			class: Header,
+			inlineToolbar: false,
+		},
+		paragraph: {
+			inlineToolbar: false,
+			tunes: ["anyTuneName"],
+		},
 		image: {
 			class: ImageTool,
 			config: {
-				additionalRequestHeaders: {
-					"X-CSRF-TOKEN": document
-						.querySelector('meta[name="csrf-token"]')
-						.getAttribute("content"),
-					field: "PATCH",
-				},
-				endpoints: {
-					byFile: route("addQuestionImage", [
-						props.exam.id,
-						dataPropsQuestions.value[props.selected].question_data[0]
-							.question_id,
-					]),
+				// additionalRequestHeaders: {
+				// 	"X-CSRF-TOKEN": document
+				// 		.querySelector('meta[name="csrf-token"]')
+				// 		.getAttribute("content"),
+				// 	field: "PATCH",
+				// },
+				// endpoints: {
+				// 	byFile: route("addQuestionImage", [
+				// 		props.exam.id,
+				// 		dataPropsQuestions.value[props.selected].question_data[0]
+				// 			.question_id,
+				// 	]),
+				// },
+				uploader: {
+					uploadByFile(file) {
+						let formData = new FormData();
+						formData.append("image", file);
+						return axios
+							.post(
+								route("addQuestionImage", [
+									props.exam.id,
+									dataPropsQuestions.value[props.selected]
+										.question_data[0].question_id,
+								]),
+								formData,
+								{
+									headers: {
+										"Content-Type": "multipart/form-data",
+									},
+								}
+							)
+							.then((output) => {
+								emit("questionsEmit", output.data.get);
+								data.value[0].question_id = "";
+								data.value[0].blocks = [];
+								return output.data.question;
+							})
+							.then((output) => {
+								dataSet();
+								console.log(output.data);
+								const imageData = {
+									success: 1,
+									file: {
+										url: output.data.file.file.url,
+									},
+									withBackground: true,
+								};
+								return imageData;
+							});
+					},
 				},
 			},
 		},
@@ -110,34 +128,45 @@ const editor = new EditorJS({
 			class: Checklist,
 			inlineToolbar: true,
 		},
+		anyTuneName: {
+			class: AlignmentTuneTool,
+			config: {
+				default: "left",
+				blocks: {
+					header: "center",
+					list: "right",
+				},
+			},
+		},
 	},
 	// autofocus: true,
 	data: {
 		...data.value[props.selected],
 	},
 	placeholder: "Tulis Soal",
+	onChange: (api, event) => {
+		data.value[0].question_id = "";
+		data.value[0].blocks = [];
+		autoSave();
+	},
 });
 const selected = toRef(props, "selected");
 const selectedDuplicate = ref(props.selected);
 const idQuestionDuplicate = ref(props.idQuestion);
 watch(selected, () => {
 	editor.isReady.then(() => {
-		console.log("isReady");
-		// console.log(idQuestionDuplicate.value);
 		pending();
 		editor
 			.save()
 			.then((outputData) => {
-				console.log(outputData);
 				axios
-					.post(route("questionUpdate", props.exam.id), {
+					.get(route("questionDataUpdate", props.exam.id), {
 						data: outputData,
 						count: selectedDuplicate.value,
 						idQuestion: idQuestionDuplicate.value,
 					})
 					.then((outputText) => {
-						dataPropsQuestions.value = [];
-						dataPropsQuestions.value.push(...outputText.data);
+						emit("questionsEmit", outputText.data);
 						selectedDuplicate.value = props.selected;
 						idQuestionDuplicate.value = props.idQuestion;
 						pending();
@@ -146,47 +175,136 @@ watch(selected, () => {
 			.catch((error) => {
 				selectedDuplicate.value = props.selected;
 				idQuestionDuplicate.value = props.idQuestion;
-				console.log("Saving failed: ", error);
 			});
-		editor.render(data.value[0]);
 	});
-	// console.log(dataPropsQuestions.value[props.selected].question_data);
-	if (dataPropsQuestions.value[props.selected].question_data[0] != undefined) {
+	dataSet();
+});
+let questionsD = toRef(props, "questions");
+watch(questionsD, () => {
+	dataPropsQuestions.value = [];
+	dataPropsQuestions.value.push(...props.questions);
+});
+// const saveQuestionCountToRef = toRef(props, "saveQuestionCount");
+// watch(saveQuestionCountToRef, () => {
+// 	editor.isReady.then(() => {
+// 		pending();
+// 		editor.save().then((outputData) => {
+//
+// 	});
+// });
+
+function autoSave() {
+	pendingNoEffect();
+	editor.isReady.then(() => {
+		editor.save().then((outputData) => {
+			axios
+				.post(route("questionUpdate", props.exam.id), {
+					idQuestion: dataPropsQuestions.value[props.selected].id,
+					data: outputData,
+				})
+				.then((output) => {
+					emit("questionsEmit", output.data);
+					pendingNoEffect();
+				})
+				.catch((error) => {
+					pendingNoEffect();
+				});
+		});
+	});
+}
+const removeQuestionCountToRef = toRef(props, "removeQuestion");
+watch(removeQuestionCountToRef, () => {
+	editor.isReady.then(() => {
+		pending();
+		editor.save().then((outputData) => {
+			axios
+				.post(route("removeQuestion", props.exam.id), {
+					idQuestion: dataPropsQuestions.value[props.selected].id,
+					data: outputData,
+				})
+				.then((output) => {
+					emit("removeQuestionApplyData");
+					emit("questionsEmit", output.data);
+					// console.log(output.data);
+					return output;
+				})
+				.then((output) => {
+					data.value[0].question_id = "";
+					data.value[0].blocks = [];
+					return output;
+				})
+				.then((output) => {
+					dataSet();
+					pending();
+				})
+				.catch((error) => {
+					pending();
+				});
+		});
+	});
+});
+const check = () => {
+	editor.isReady.then(() => {
+		editor.save().then((outputData) => {});
+	});
+};
+function saveData() {
+	dataSet();
+
+	editor.isReady.then(() => {
+		editor.save().then((outputData) => {
+			editor.render(data.value[0]);
+		});
+	});
+}
+function dataSet() {
+	if (
+		dataPropsQuestions.value[props.selected].question_data[0] != undefined
+	) {
 		data.value[0].question_id = "";
 		data.value[0].blocks = [];
 		data.value[0].question_id =
-			dataPropsQuestions.value[props.selected].question_data[0].question_id;
+			dataPropsQuestions.value[
+				props.selected
+			].question_data[0].question_id;
 		for (let dataText in dataPropsQuestions.value[props.selected]
 			.question_data) {
 			if (
-				dataPropsQuestions.value[props.selected].question_data[dataText].type ==
-				"image"
+				dataPropsQuestions.value[props.selected].question_data[dataText]
+					.type == "image"
 			) {
 				data.value[0].blocks.push({
-					type: dataPropsQuestions.value[props.selected].question_data[dataText]
-						.type,
-					id: dataPropsQuestions.value[props.selected].question_data[dataText]
-						.id,
+					type: dataPropsQuestions.value[props.selected]
+						.question_data[dataText].type,
+					id: dataPropsQuestions.value[props.selected].question_data[
+						dataText
+					].id,
 					data: {
 						file: {
 							url:
-								dataPropsQuestions.value[props.selected].question_data[dataText]
-									.question_attachment.path +
-								dataPropsQuestions.value[props.selected].question_data[dataText]
-									.question_attachment.filename,
+								dataPropsQuestions.value[props.selected]
+									.question_data[dataText].question_attachment
+									.path +
+								dataPropsQuestions.value[props.selected]
+									.question_data[dataText].question_attachment
+									.filename,
 						},
+						withBackground:
+							dataPropsQuestions.value[props.selected]
+								.question_data[dataText].question_attachment
+								.withBackground,
 					},
 				});
 			} else {
 				data.value[0].blocks.push({
-					type: dataPropsQuestions.value[props.selected].question_data[dataText]
-						.type,
-					id: dataPropsQuestions.value[props.selected].question_data[dataText]
-						.id,
+					type: dataPropsQuestions.value[props.selected]
+						.question_data[dataText].type,
+					id: dataPropsQuestions.value[props.selected].question_data[
+						dataText
+					].id,
 					data: {
-						text: dataPropsQuestions.value[props.selected].question_data[
-							dataText
-						].data,
+						text: dataPropsQuestions.value[props.selected]
+							.question_data[dataText].data,
 					},
 				});
 			}
@@ -200,97 +318,21 @@ watch(selected, () => {
 			},
 		});
 	}
-	// console.log(data.value[0]);
-});
-let questionsD = toRef(props, "questions");
-watch(questionsD, () => {
-	// console.log(questionsD.value);
-	dataPropsQuestions.value = [];
-	dataPropsQuestions.value.push(...props.questions);
-	// console.log(dataPropsQuestions.value);
-});
-const saveQuestionCountToRef = toRef(props, "saveQuestionCount");
-watch(saveQuestionCountToRef, () => {
 	editor.isReady.then(() => {
-		pending();
-		editor.save().then((outputData) => {
-			axios
-				.post(route("questionUpdate", props.exam.id), {
-					idQuestion: props.idQuestion,
-					data: outputData,
-				})
-				.then((output) => {
-					pending();
-				})
-				.catch((error) => {
-					pending();
-				});
-		});
-	});
-});
-const removeQuestionCountToRef = toRef(props, "removeQuestion");
-watch(removeQuestionCountToRef, () => {
-	editor.isReady.then(() => {
-		pending();
-		editor.save().then((outputData) => {
-			axios
-				.post(route("removeQuestion", props.exam.id), {
-					idQuestion: props.idQuestion,
-					data: outputData,
-				})
-				.then((output) => {
-					emit("removeQuestion", output.data);
-					dataPropsQuestions.value = [];
-					data.value[0].question_id = null;
-					data.value[0].blocks = [];
-					dataPropsQuestions.value.push(...output.data);
-					data.value[0].question_id =
-			dataPropsQuestions.value[props.selected].question_data[0].question_id;
-		for (let dataText in dataPropsQuestions.value[props.selected]
-			.question_data) {
-			if (
-				dataPropsQuestions.value[props.selected].question_data[dataText].type ==
-				"image"
-			) {
-				data.value[0].blocks.push({
-					type: dataPropsQuestions.value[props.selected].question_data[dataText]
-						.type,
-					id: dataPropsQuestions.value[props.selected].question_data[dataText]
-						.id,
-					data: {
-						file: {
-							url:
-								dataPropsQuestions.value[props.selected].question_data[dataText]
-									.question_attachment.path +
-								dataPropsQuestions.value[props.selected].question_data[dataText]
-									.question_attachment.filename,
-						},
-					},
-				});
-			} else {
-				data.value[0].blocks.push({
-					type: dataPropsQuestions.value[props.selected].question_data[dataText]
-						.type,
-					id: dataPropsQuestions.value[props.selected].question_data[dataText]
-						.id,
-					data: {
-						text: dataPropsQuestions.value[props.selected].question_data[
-							dataText
-						].data,
-					},
-				});
-			}
-		}
 		editor.render(data.value[0]);
-
-		console.log(data.value)
-					pending();
-				})
-				.catch((error) => {
-					pending();
-				});
-		});
 	});
-	
-});
+}
+dataSet();
 </script>
+<style>
+.ce-popover__item[data-item-name="withBorder"],
+.ce-popover__item[data-item-name="stretched"] {
+	display: none;
+}
+.image-tool__caption {
+	display: none;
+}
+.image-tool--withBackground .image-tool__image {
+	background: white !important;
+}
+</style>

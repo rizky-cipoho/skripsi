@@ -5,13 +5,15 @@ use Illuminate\Http\Request;
 use Inertia\Inertia;
 use App\Models\User;
 use App\Models\History;
+use App\Models\Question;
 use App\Models\Lesson;
+use App\Models\TimeStart;
 use App\Models\Exam;
 use Illuminate\Support\Facades\Auth;
 
 trait ExamTrait
 {
-public function recommendations(){
+    public function recommendations(){
         $histories = History::where('user_id', Auth::user()->id)->get();
         $myExam = Exam::where('user_id', Auth::user()->id)->get();
         $collecttion = collect([]);
@@ -74,5 +76,68 @@ public function recommendations(){
         }
 
         return (int)$result;
+    }
+    public function examNotReady($id){
+        $problem = collect([]);
+        $examId = Exam::with('lesson')->with([
+            'time'=>function($time){
+                $time->with('startTime');
+                $time->where('remove', null);
+            }
+        ])->find($id);
+        $exam = Question::where('exam_id', $id)->where('remove', null)->with('questionData', function($query){
+            $query->where('remove', null);
+            $query->with('questionAttachment');
+        })->with('choice', function($val){
+            $val->where('remove', null);
+            $val->with('attachment');
+            $val->with('keys', function($val2){
+                $val2->where('remove', null);
+            });
+        })->get();
+        if($exam->count() < 5){
+            $problem->push('setidaknya buat 5 soal atau lebih');
+        }
+        if($examId->lesson->lesson == 'Lainnya'){
+            if ($examId->other == null) {
+                $problem->push('Spesifikkan Pelajaran Lainnya');
+            }
+        }
+        if($examId->time->start != null){
+            $time = TimeStart::find($examId->time->time_starts_id);
+            if ($time->start == null) {
+                $problem->push('Tentukan Tanggal Mulai Ujian');
+            }
+        }
+
+        foreach($exam as $key=>$question){
+            foreach($question->questionData as $data){
+                if (($data->data == null || $data->data == "") && $data->question_attachment == null) {
+                    $problem->push('Soal tidak boleh kosong'.' No.'.$key+1);
+                    break;
+                }
+            }
+        }
+        foreach($exam as $key=>$question){
+            foreach($question->choice as $choice){
+                // dump(($choice->choice == null || $data->data == "") && $choice->choice_attachment == null);
+                if (($choice->choice == null || $choice->choice == "") && $choice->choice_attachment == null) {
+                    $problem->push('Pilihan tidak boleh kosong'.' No.'.$key+1);
+                    break;
+                } 
+            }
+            // break;
+        }
+        foreach($exam as $key=>$question){
+            $collect = collect([]);
+            foreach($question->choice as $choice){
+                $collect->push($choice->keys == null);
+            } 
+            if (!$collect->contains(false)) {
+                $problem->push('Setiap soal harus memiliki satu jawaban yang benar'.' No.'.$key+1);
+            }
+        }
+// dd($problem);
+        return $problem;
     }
 }

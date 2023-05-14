@@ -34,7 +34,7 @@
          name=""
          class="shadow border border-gray-200 rounded py-1 px-2 w-full"
          v-model="input"
-         placeholder="Masukkan Nama Ujian"
+         placeholder=""
         />
         <div class="flex justify-end">
          <button
@@ -69,7 +69,7 @@ const props = defineProps({
  pending: Boolean,
  title: String
 });
-const input = ref("");
+const input = ref(props.input);
 const lesson = ref(1);
 const emit = defineEmits(["closeModal", "changeInput"]);
 const deActive = (val) => {
