@@ -16,7 +16,9 @@ class Session extends Model
         'user_id',
         'history_id',
         'exam_id',
+        'point',
         'over',
+        'rate',
     ];
     public function exam(){
         return $this->belongsTo(Exam::class, 'exam_id');
@@ -26,5 +28,8 @@ class Session extends Model
     }
     public function user(){
         return $this->belongsTo(User::class, 'user_id');
+    }
+    public function cheat(){
+        return $this->hasMany(Cheat::class, 'session_id');
     }
 }

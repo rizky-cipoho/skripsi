@@ -1,5 +1,5 @@
 <template>
-	<div class="rounded-lg bg-white">
+	<div class="rounded-lg bg-white hover:bg-gray-200">
 		<div :style="{ 'background-image': 'url('+ card.image +')' }" class=" w-full h-[130px] bg-cover rounded-t-lg bg-center"></div>
 		<div class="px-2 py-2">
 			<p class="text-base pt-2 font-semibold textlimit ">{{ card.title }}</p>
@@ -14,4 +14,5 @@
 		title: String,
 		author: String
 	})
+		
 </script>

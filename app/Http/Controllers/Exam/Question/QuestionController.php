@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Traits\ExamTrait;
 use App\Models\Exam;
+use App\Models\Point;
 use App\Models\Choice_attachment;
 use App\Models\Choice;
 use App\Models\Question;
@@ -122,6 +123,11 @@ class QuestionController extends Controller
         $questionData->type = 'paragraph';
         $questionData->question_id = $question->id;
         $questionData->save();
+
+        $point = Point::create([
+            'point'=>10,
+            'question_id'=>$question->id
+        ]);
 
         for ($i=0; $i < $exam->choice ; $i++) { 
             $choice = Choice::create([

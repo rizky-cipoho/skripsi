@@ -46,7 +46,9 @@
 										<DocumentTextOutline
 											class="w-6 mr-1 text-red-600"
 										/>
-										<p class="font-semibold text-2xl">5</p>
+										<p class="font-semibold text-2xl">
+											{{ props.history.length }}
+										</p>
 									</div>
 									<small>Ujian dikerjakan</small>
 								</div>
@@ -108,6 +110,40 @@
 						Kerjakan Ujian
 					</button>
 					<!-- </a> -->
+					<div
+						class="overflow-y-auto border mt-5"
+						v-if="props.history.length != 0"
+					>
+						<table class="table table-zebra w-full z-[-1]">
+							<tr
+								v-for="(history, index) in props.history"
+								:class="{ hidden: index >= 10 }"
+							>
+								<th>
+									<span	
+										class="px-3"
+	
+										:class="[
+											{ 'bg-yellow-300': index == 0 },
+											{ 'bg-zinc-300': index == 1 },
+											{ 'bg-amber-600': index == 2 },
+										]"
+										>{{ parseInt(index) + 1 }}</span	
+									>
+								</th>
+								<td>
+									<div
+										class="w-16 h-16 bg-cover rounded-full"
+										style="
+											background-image: url('/image/rasberry.jpg');
+										"
+									></div>
+								</td>
+								<td>{{ history.history.user.name }}</td>
+								<td>Point. {{ history.point }}</td>
+							</tr>
+						</table>
+					</div>
 				</div>
 				<div class="w-4/12 px-10">
 					<p class="pt-1 font-semibold text-xl">Judul Ujian</p>
@@ -115,10 +151,31 @@
 						{{ props.exam.exam }}
 					</p>
 					<div class="border-b-2 pb-3 mb-3 border-red-400"></div>
-					<p class="pt-1 font-semibold">Deskripsi Ujian</p>
-					<small class="">
-						{{ props.exam.description }}
-					</small>
+					<div>
+						<p class="pt-1 font-semibold">Deskripsi Ujian</p>
+						<small
+							:class="{
+								'text-gray-400': props.exam.description == null,
+							}"
+						>
+							{{
+								props.exam.description != null
+									? props.exam.description
+									: "Tidak ada deskripsi"
+							}}
+						</small>
+					</div>
+					<div class="border-b-2 pb-3 mb-3 border-red-400"></div>
+					<div>
+						<p class="pt-1 font-semibold">Tingkat Ujian</p>
+						<small
+							:class="{
+								'text-gray-400': props.exam.description == null,
+							}"
+						>
+							{{ props.exam.tier }}
+						</small>
+					</div>
 
 					<div v-if="props.exam.time.start_time != null">
 						<div v-if="props.exam.time.start_time.start != null">
@@ -192,6 +249,8 @@
 		:input="key"
 		:title="'Masukkan Kunci'"
 	/>
+		@closeModal="closeModal"
+	<ModalRules :show="rules" @closeModal="closeModal" class="z-30" />
 	<Transition>
 		<Notification
 			:show="notification"
@@ -200,9 +259,11 @@
 		/>
 	</Transition>
 </template>
+
 <script type="text/javascript" setup>
 import Navbar from "@/Components/navbar.vue";
 import ModalExamChange from "@/Components/modal/modalExamElseKey.vue";
+import ModalRules from "@/Components/modal/modalRules.vue";
 import Notification from "@/Components/notification/index.vue";
 import { ref, watch } from "vue";
 import { Link } from "@inertiajs/inertia-vue3";
@@ -217,9 +278,10 @@ const props = defineProps({
 	auth: Object,
 	exam: Object,
 	problem: Object,
+	history: Object,
 	notification: String,
 });
-// console.log(props.exam);
+// console.log(props.problem);
 const key = ref("");
 const keyModal = ref(false);
 const keyPending = ref(false);
@@ -244,6 +306,7 @@ function keyValidate(val) {
 }
 const closeModal = () => {
 	keyModal.value = false;
+	rules.value = false
 };
 watch(notification, () => {
 	if (notification.value == true) {
@@ -298,9 +361,21 @@ if (props.exam.time.start != null) {
 			// console.log(overMilis.value);
 		}, 1000);
 	}
+	// console.log(props.problem);
 }
+watch(
+	examReadyResult,
+	() => {
+		if (props.problem.length != 0) {
+			examReadyResult.value = false;
+			console.log("asdsa");
+		}
+		console.log(examReadyResult.value);
+	},
+	{ immediate: true }
+);
 const ready = () => {
 	return props.problem.length == 0 && examReady.value == true;
 };
-// console.log("ini")
+const rules = ref(true);
 </script>

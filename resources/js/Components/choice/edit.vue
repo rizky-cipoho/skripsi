@@ -22,12 +22,12 @@
 						type="text"
 						class="md:w-11/12 max-md:w-full textarea textarea-bordered"
 						placeholder="Masukkan nilai pilihan"
-						v-debounce:300="submitKeyup"
+						v-debounce:300.once="submitKeyup"
 						rows="3"
 						style="resize: none"
 						:id="choice.id"
 						:title="choice.question_id"
-						v-model="choice.choice"
+						v-model.once="choice.choice"
 					/>
 				</div>
 				<div class="flex">
@@ -83,19 +83,19 @@ console.log(props.questions);
 const emit = defineEmits(["pending", "questionsEmit", "pendingNoEffect"]);
 // const choice = ref("")
 function submitKeyup(val, a) {
-	emit("pendingNoEffect");
-	axios
-		.post(route("updateChoice", props.exam.id), {
-			choice: val,
-			id: a.target.id,
-			question_id: a.target.title,
-		})
-		.then((output) => {
-			emit("questionsEmit", output.data);
-		})
-		.then(() => {
-			emit("pendingNoEffect");
-		});
+		emit("pendingNoEffect");
+		axios
+			.post(route("updateChoice", props.exam.id), {
+				choice: val,
+				id: a.target.id,
+				question_id: a.target.title,
+			})
+			.then((output) => {
+				emit("questionsEmit", output.data);
+			})
+			.then(() => {
+				emit("pendingNoEffect");
+			});
 }
 const choice = ref([]);
 function addChoice() {

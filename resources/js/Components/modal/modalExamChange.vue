@@ -29,13 +29,15 @@
       >
        <DialogTitle class="font-semibold">{{ props.title }}</DialogTitle>
        <div class="mt-3">
-        <input
+                <input
          type="text"
          name=""
          class="shadow border border-gray-200 rounded py-1 px-2 w-full"
          v-model="input"
          placeholder=""
+         v-if="props.title != 'Ubah Deskripsi Ujian'"
         />
+        <textarea v-else v-model="input" class="textarea textarea-bordered w-full" style=" resize: none"></textarea>
         <div class="flex justify-end">
          <button
           class="shadow rounded text-white bg-red-600 px-2 py-1 mt-3 active:bg-gray-900 hover:bg-gray-600 transition duration-150 ease-in-out select-none"

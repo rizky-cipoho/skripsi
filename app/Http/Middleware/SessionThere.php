@@ -19,7 +19,6 @@ class SessionThere
      */
     public function handle(Request $request, Closure $next)
     {
-
         $session = Session::where('over', null)->where('user_id', Auth::user()->id)->first();
         // dd($session);
         if ($session != null) {

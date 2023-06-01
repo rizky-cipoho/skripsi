@@ -10,4 +10,8 @@ class Point extends Model
 {
     use HasUlids;
     use HasFactory;
+         protected $fillable = [
+        'point',
+        'question_id'
+    ];
 }

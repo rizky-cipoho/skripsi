@@ -18,6 +18,7 @@ return new class extends Migration
           $table->string('choice_id');
           $table->string('history_question_id');
           $table->string('question_id');
+          $table->integer('line');
           $table->timestamps();
       });
     }

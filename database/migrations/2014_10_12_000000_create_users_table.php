@@ -17,6 +17,10 @@ return new class extends Migration
             $table->string('id')->primary();
             $table->string('name');
             $table->string('username')->unique();
+            $table->bigInteger('birth');
+            $table->integer('point');
+            $table->text('description')->nullable();
+            $table->string('school')->nullable();
             $table->string('password');
             $table->rememberToken();
             $table->timestamps();

@@ -13,6 +13,9 @@ class HistoryQuestion extends Model
 
     protected $fillable = [
         'history_id',
+        'line',
+        'lineBlock',
+        'question_id',
     ];
     public function questionData(){
         return $this->hasMany(HistoryQuestionData::class, 'history_question_id');
@@ -25,5 +28,8 @@ class HistoryQuestion extends Model
     }
     public function pin(){
         return $this->hasOne(Pin::class, 'history_question_id');
+    }
+    public function question(){
+        return $this->belongsTo(Question::class, 'question_id');
     }
 }

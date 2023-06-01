@@ -12,9 +12,9 @@
 					:href="route('examInfo', recomendation.id)"
 				>
 					<cardRecomendation
-						:image="recomendation.attachment.image"
+						:image="recomendation.attachment.path+recomendation.attachment.filename"
 						:title="recomendation.exam"
-						:author="recomendation.name"
+						:author="recomendation.user.name"
 						:key="index"
 						class="cursor-pointer"
 					/>
@@ -32,5 +32,5 @@ const props = defineProps({
 	recommendationsData: Object,
 	favorite: String,
 });
-console.log(props.recommendationsData);
+// console.log(props.recommendationsData);
 </script>

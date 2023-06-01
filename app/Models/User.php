@@ -21,8 +21,12 @@ class User extends Authenticatable
      */
     protected $fillable = [
         'name',
-        'email',
+        'username',
+        'birth',
         'password',
+        'point',
+        'description',
+        'school',
     ];
 
     /**
@@ -43,8 +47,7 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
     ];
-
-    public function point(){
-        return $this->hasOne(Point::class, 'user_id');
+    public function attachment(){
+        return $this->hasOne(User_attachment::class, 'user_id');
     }
 }

@@ -9,7 +9,7 @@
 				:options="chartOptions"
 				class="w-1/12"
 			/>
-			<p>Poin. 10</p>
+			<p>Poin. {{ props.question.point.point }}</p>
 		</div>
 		<div
 			v-for="(data, index) in props.question.question_data"
@@ -32,18 +32,24 @@
 				:key="index"
 				class="flex items-center gap-3"
 			>
-				<CloseCircleSharp class="w-6" v-if="choice.keys == null" />
-				<CheckmarkCircle class="w-6 text-red-600" v-if="choice.keys != null" />
 				<div>
-					<p v-if="choice.choice != null">{{ choice.choice }}</p>
-				<img
-					class="rounded p-2 border border-gray-400"
-					v-if="choice.attachment != null"
-					:src="
-						choice.attachment.path +
-						choice.attachment.filename
-					"
-				/>
+					<CloseCircleSharp class="w-6" v-if="choice.keys == null" />
+					<CheckmarkCircle
+						class="w-6 text-red-600"
+						v-if="choice.keys != null"
+					/>
+				</div>
+				<div>
+					<p v-if="choice.choice != null" class="w-full">
+						{{ choice.choice }}
+					</p>
+					<img
+						class="rounded p-2 border border-gray-400"
+						v-if="choice.attachment != null"
+						:src="
+							choice.attachment.path + choice.attachment.filename
+						"
+					/>
 				</div>
 			</div>
 		</div>
@@ -57,9 +63,8 @@ import Chart from "primevue/chart";
 const props = defineProps({
 	question: Object,
 	index: Number,
+	session: Object,
 });
-
-// console.log(props.question);
 
 onMounted(() => {
 	chartData.value = setChartData();
@@ -75,12 +80,50 @@ const chartOptions = ref({
 		},
 	},
 });
+const passed = ref(0);
+const fail = ref(0);
+const user = ref([]);
+const exam = ref([]);
+for (let i in props.session) {
+	if (user.value.includes(props.session[i].history.user_id) == false) {
+		user.value.push(props.session[i].history.user_id);
+		for (let k in props.session[i].history.question) {
+			if (
+				props.session[i].history.question[k].question_id ==
+				props.question.id
+			) {
+				if (props.session[i].history.question[k].answer == null) {
+					fail.value++;
+				} else {
+					for (let j in props.question.choice) {
+						if (props.question.choice[j].keys != null) {
+							if (
+								props.session[i].history.question[k].answer !=
+								null
+							) {
+								if (
+									props.question.choice[j].keys.choice_id ==
+									props.session[i].history.question[k].answer
+										.choice_history.choice.id
+								) {
+									passed.value++;
+								} else {
+									fail.value++;
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+}
 
 const setChartData = () => {
 	return {
 		datasets: [
 			{
-				data: [540, 325],
+				data: [passed.value, fail.value],
 				backgroundColor: ["rgb(220 38 38)", "rgb(31 41 55)"],
 				hoverBackgroundColor: ["rgb(239 68 68)", "rgb(17 24 39)"],
 			},

@@ -20,6 +20,9 @@ return new class extends Migration
             $table->string('user_id');
             $table->string('history_id');
             $table->string('exam_id');
+            $table->integer('point');
+            $table->integer('rate')->nullable();
+            $table->string('alert')->nullable();
             $table->string('over')->nullable();
             $table->timestamps();
         });

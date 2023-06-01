@@ -14,6 +14,7 @@ class HistoryChoice extends Model
         'choice_id',
         'question_id',
         'history_question_id',
+        'line',
     ];
     public function choice(){
         return $this->belongsTo(Choice::class, 'choice_id');

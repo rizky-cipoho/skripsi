@@ -38,7 +38,7 @@ class AuthenticatedSessionController extends Controller
             $request->session()->regenerate();
             return redirect()->intended(RouteServiceProvider::HOME);
         }
-        return back()->with('gagal', "Gagal Login");
+        return back()->with('catch', "Username atau Password Salah");
 
     }
 

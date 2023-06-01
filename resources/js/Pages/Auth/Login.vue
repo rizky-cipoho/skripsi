@@ -1,7 +1,18 @@
 <template>
     <GuestLayout :name="title">
         <Head title="Log in" />
-
+<div class="alert alert-success shadow-lg mb-5" v-if="page.props.value.flash.message != undefined">
+  <div>
+    <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current flex-shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+    <span>{{ page.props.value.flash.message }}</span>
+  </div>
+</div>
+<div class="alert alert-error shadow-lg mb-5" v-if="page.props.value.flash.catch != undefined">
+  <div>
+    <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current flex-shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+    <span>{{ page.props.value.flash.catch }}</span>
+  </div>
+</div>
         <div v-if="status" class="mb-4 font-medium text-sm text-green-600">
             {{ status }}
         </div>
@@ -50,12 +61,18 @@ import InputError from '@/Components/InputError.vue';
 import InputLabel from '@/Components/InputLabel.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import TextInput from '@/Components/TextInput.vue';
-import { Head, Link, useForm } from '@inertiajs/inertia-vue3';
+import { Head, Link, useForm, usePage } from '@inertiajs/inertia-vue3';
+import { computed } from 'vue';
 
 defineProps({
     canResetPassword: Boolean,
     status: String,
+    alert: String,
 });
+const page = usePage()
+console.log(page.props.value.flash != undefined)
+const user = computed(() => page.props.auth.user)
+// console.log(page.props.)
 const title = "Login"
 const form = useForm({
     username: '',

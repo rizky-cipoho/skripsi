@@ -26,7 +26,6 @@ class DatabaseSeeder extends Seeder
             LessonSeeder::class,
             UserSeeder::class,
             ExamAttachmentsSeeder::class, 
-            PointsSeeder::class,
             RolesSeeder::class,
         ]);
     }

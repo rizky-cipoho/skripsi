@@ -16,6 +16,9 @@ return new class extends Migration
         Schema::create('history_questions', function (Blueprint $table) {
            $table->string('id')->primary();
            $table->string('history_id');
+           $table->integer('line');
+           $table->integer('lineBlock');
+           $table->string('question_id');
            $table->timestamps();
        });
     }

@@ -12,7 +12,13 @@ use App\Http\Controllers\Exam\ExamPageController;
 use App\Http\Controllers\Exam\Question\QuestionController;
 use App\Http\Controllers\Exam\else\ExamElseController;
 use App\Http\Controllers\Exam\Question\Choice\ChoiceController;
+use App\Http\Controllers\History\HistoryController;
+use App\Http\Controllers\Rank\RankCurrentController;
+use App\Http\Controllers\User\UserController;
+use App\Http\Controllers\Cheat\CheatController;
 use App\Http\Middleware\SessionThere;
+use App\Http\Middleware\TokenIsMine;
+use App\Http\Middleware\ExamRemove;
 
 /*
 |--------------------------------------------------------------------------
@@ -32,18 +38,32 @@ Route::get('guestLogin', [RegisteredUserController::class, 'guestLogin'])->name(
 
 Route::group(['middleware'=>['auth'], 'prefix'=>'/dashboard'], function(){
     Route::get('/', [DashboardController::class, 'dashboard'])->name('dashboard')->middleware(SessionThere::class);
+    Route::get('/history', [HistoryController::class, 'history'])->name('history')->middleware(SessionThere::class);
+    Route::get('/rankCurrent', [RankCurrentController::class, 'rankCurrent'])->name('rankCurrent')->middleware(SessionThere::class);
+    Route::get('/setting', [UserController::class, 'setting'])->name('setting')->middleware(SessionThere::class);
+    Route::post('/setting/name', [UserController::class, 'settingName'])->name('settingName')->middleware(SessionThere::class);
+    Route::post('/setting/description', [UserController::class, 'settingDescription'])->name('settingDescription')->middleware(SessionThere::class);
+    Route::post('/setting/school', [UserController::class, 'settingSchool'])->name('settingSchool')->middleware(SessionThere::class);
+    Route::post('/setting/image', [UserController::class, 'settingImage'])->name('settingImage')->middleware(SessionThere::class);
     Route::get('/search', [DashboardController::class, 'search'])->name('search');
-    Route::group(['prefix'=>'/my/exam', 'middleware'=>'sessionthere'], function(){
+    Route::group(['prefix'=>'/my/exam', 'middleware'=>['examRemove','sessionthere']], function(){
         Route::get('/', [ExamPageController::class, 'myExam'])->name('myExam');
         Route::get('/add', [ExamPageController::class, 'add'])->name('examAdd');
         Route::get('/{id}', [ExamPageController::class, 'selected'])->name('examSelected');
         // Route::get('/{id}/question', [ExamPageController::class, 'selected'])->name('examSelected');
-        Route::get('/{id}/change/exam/name', [ExamPageController::class, 'changeExamName'])->name('changeExamName');
+        Route::post('/{id}/change/exam/name', [ExamPageController::class, 'changeExamDescription'])->name('changeExamDescription');
+        Route::post('/{id}/change/image', [ExamPageController::class, 'changeExamImage'])->name('changeExamImage');
+        Route::get('/{id}/change/exam/description', [ExamPageController::class, 'changeExamName'])->name('changeExamName');
         Route::get('/{id}/change/exam/lesson', [ExamPageController::class, 'changeExamLesson'])->name('changeExamLesson');
+        Route::get('/{id}/history', [ExamPageController::class, 'myExamHistory'])->name('myExamHistory');
         Route::post('/{id}/key', [ExamPageController::class, 'examKey'])->name('examKey');
         Route::post('/{id}/time/duration', [ExamPageController::class, 'timeDuration'])->name('timeDuration');
         Route::post('/{id}/time/startExamCheckBox', [ExamPageController::class, 'startExamCheckBox'])->name('startExamCheckBox');
         Route::post('/{id}/time/timeStart', [ExamPageController::class, 'timeStart'])->name('timeStart');
+        Route::post('/{id}/tier', [ExamPageController::class, 'tier'])->name('tier');
+        Route::get('/{id}/remove', [ExamPageController::class, 'examRemove'])->name('examRemove');
+        Route::post('/{id}/minimum', [ExamPageController::class, 'minimum'])->name('minimum');
+        Route::post('/{id}/detected', [ExamPageController::class, 'detected'])->name('detected');
 
         Route::group(['prefix'=>'/{id}/question'], function(){
             Route::get('/', [QuestionController::class, 'edit'])->name('questionEdit');
@@ -65,11 +85,13 @@ Route::group(['middleware'=>['auth'], 'prefix'=>'/dashboard'], function(){
     route::group(['prefix'=>'/exam/else'], function(){
         Route::get('/{id}', [ExamElseController::class, 'examInfo'])->name('examInfo')->middleware(SessionThere::class);;
         Route::get('/{id}/session', [ExamElseController::class, 'createSession'])->name('createSession')->middleware(SessionThere::class);;
-        Route::get('/{id}/generate/data/session', [ExamElseController::class, 'generateDataSession'])->name('generateDataSession')->middleware(SessionThere::class);;
-        Route::get('/{id}/generate/data/where/{token}', [ExamElseController::class, 'dataSession'])->name('dataSession');
-        Route::post('/{id}/generate/data/where/{token}/choice', [ExamElseController::class, 'getDataTokenChoice'])->name('getDataTokenChoice');
-        Route::get('/{id}/generate/data/where/{token}/over', [ExamElseController::class, 'tokenOver'])->name('tokenOver');
-        Route::post('/{id}/generate/data/where/{token}/pin', [ExamElseController::class, 'tokenPin'])->name('tokenPin');
+        Route::get('/{id}/generate/data/session', [ExamElseController::class, 'generateDataSession'])->name('generateDataSession')->middleware(SessionThere::class);
+        Route::get('/{id}/generate/data/where/{token}', [ExamElseController::class, 'dataSession'])->middleware(TokenIsMine::class)->name('dataSession');
+        Route::post('/{id}/generate/data/where/{token}/cheat', [CheatController::class, 'cheat'])->middleware(TokenIsMine::class)->name('cheat');
+        Route::post('/{id}/generate/data/where/{token}/choice', [ExamElseController::class, 'getDataTokenChoice'])->middleware(TokenIsMine::class)->name('getDataTokenChoice');
+        Route::get('/{id}/generate/data/where/{token}/over', [ExamElseController::class, 'tokenOver'])->middleware(TokenIsMine::class)->name('tokenOver');
+        Route::get('/{id}/session/result/{token}', [ExamElseController::class, 'result'])->middleware(TokenIsMine::class)->name('result');
+        Route::post('/{id}/generate/data/where/{token}/pin', [ExamElseController::class, 'tokenPin'])->middleware(TokenIsMine::class)->name('tokenPin');
     });
 
     Route::get('/recommendation/{index}', function () {
@@ -78,9 +100,6 @@ Route::group(['middleware'=>['auth'], 'prefix'=>'/dashboard'], function(){
     Route::get('/user/{index}/{name}', function () {
         return Inertia::render('Dashboard');
     })->name('userIndex');
-    Route::get('/rankcurrent', function () {
-        return Inertia::render('rankcurrent');
-    })->name('rankcurrent');
     Route::get('accept', [AcceptController::class, 'index']);
     Route::get('hujan', function(){
         return Inertia::render('list');

@@ -15,7 +15,7 @@ trait ExamTrait
 {
     public function recommendations(){
         $histories = History::where('user_id', Auth::user()->id)->get();
-        $myExam = Exam::where('user_id', Auth::user()->id)->get();
+        $myExam = Exam::where('user_id', Auth::user()->id)->where('remove', null)->get();
         $collecttion = collect([]);
         foreach ($histories as $value) {
             $collecttion->push($value->exam->id);
@@ -24,11 +24,57 @@ trait ExamTrait
             $collecttion->push($value->id);
         }
         $collecttion->unique();
+        $ages = collect([]);
+        $now = date('Y');
+            // dump((int)$now - 10);
+        $sd = collect([]);
+        $smp = collect([]);
+        $sma = collect([]);
+        $nowCountSD = (int)$now - 5;
+        $nowCountSMP = (int)$now - 16;
+        $nowCountSMA = (int)$now - 14;
+        $nowCountMahasiswa = (int)$now - 17;
+        for($i = 0;$i < 6; $i++){
+            $nowCountSD--;
+            $sd->push($nowCountSD);
+        }
+        for($i = 0;$i < 4; $i++){
+            $nowCountSMP++;
+            $smp->push($nowCountSMP);
+        }
+        for($i = 0;$i < 6; $i++){
+            $nowCountSMA--;
+            $sma->push($nowCountSMA);
+        }
+
+        $userY = date('Y', Auth::user()->birth/1000);
+        if ($sd->contains($userY)) {
+            $ages->push('SD');
+            if ($smp->contains($userY)) {
+                $ages->push('SMP');
+            }
+        }elseif($smp->contains($userY)){
+            $ages->push('SMP');
+            if ($sma->contains($userY)) {
+                $ages->push('SMA');
+            }
+        }elseif($sma->contains($userY)){
+            $ages->push('SMA');
+            if ($nowCountMahasiswa <= $userY) {
+                $ages->push('Mahasiswa');
+            }
+        }else{
+            if ($userY <= $nowCountMahasiswa) {
+                $ages->push('Mahasiswa');
+            }else{
+                $ages->push('SD');
+            }
+        }
         if($this->favorite() != "Semuanya"){
             $lesson = Lesson::where('lesson', $this->favorite())->first();
-            $result = Exam::whereNotIn('id', $collecttion)->where('lesson_id', $lesson->id)->with('attachment')->orderBy('id','DESC')->get();
+            $result = Exam::whereNotIn('id', $collecttion)->where('lesson_id', $lesson->id)->where('remove', null)->with('attachment')->orderBy('id','DESC')->whereIn('tier',$ages)->with('user')->get();
         }else{
-            $result = Exam::whereNotIn('id', $collecttion)->with('attachment')->orderBy('id','DESC')->get();
+            $result = Exam::whereNotIn('id', $collecttion)->with('attachment')->orderBy('id','DESC')->where('remove', null)->whereIn('tier',$ages)->with('user')->get();
         }
         $data = collect([]);
         $length = 0;

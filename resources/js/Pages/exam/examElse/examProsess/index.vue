@@ -38,14 +38,20 @@
 						class="flex items-center cursor-pointer text-red-600 hover:scale-105 duration-150 select-none"
 						@click="selected--"
 						:disabled="selected == 0"
-						:class="{ 'opacity-50 cursor-not-allowed': selected == 0 }"
+						:class="{
+							'opacity-50 cursor-not-allowed': selected == 0,
+						}"
 					>
 						<ArrowBackSharp class="w-5 mr-2" />
 						<p>Sebelumnya</p>
 					</button>
 					<button
 						class="flex items-center cursor-pointer text-red-600 hover:scale-105 duration-150 select-none"
-						:class="{ hidden: selected == (props.data.history.question.length-1) }"
+						:class="{
+							hidden:
+								selected ==
+								props.data.history.question.length - 1,
+						}"
 						@click="selected++"
 					>
 						<p>Selanjutnya</p>
@@ -53,7 +59,11 @@
 					</button>
 					<button
 						class="flex items-center cursor-pointer text-red-600 hover:scale-105 duration-150"
-						:class="{ hidden: selected != (props.data.history.question.length-1) }"
+						:class="{
+							hidden:
+								selected !=
+								props.data.history.question.length - 1,
+						}"
 						@click="showOver = !showOver"
 					>
 						<p>Selesai</p>
@@ -108,10 +118,21 @@
 				class="border h-fit text-center w-full py-2 mb-2 cursor-pointer hover:bg-red-600 hover:text-white select-none"
 				v-for="(question, i) in data.history.question"
 				:id="i"
-				:class="[{ 'bg-gray-700 text-white':question.answer != null},{ 'bg-amber-400 text-black':question.pin == null ? false : i == selected ? false : true },{ 'bg-red-600 text-white': i == selected }]"
+				:class="[
+					{ 'bg-gray-700 text-white': question.answer != null },
+					{
+						'bg-amber-400 text-black':
+							question.pin == null
+								? false
+								: i == selected
+								? false
+								: true,
+					},
+					{ 'bg-red-600 text-white': i == selected },
+				]"
 				@click="selectedMethod"
 			>
-				{{ i+1 }}
+				{{ i + 1 }}
 			</div>
 		</div>
 		<button
@@ -125,27 +146,45 @@
 		<button
 			class="border flex justify-center py-3 bg-white hover:bg-red-600 hover:text-white cursor-pointer select-none w-full"
 			@click="selected++"
-			:class="{ hidden: selected == (props.data.history.question.length-1) }"
+			:class="{
+				hidden: selected == props.data.history.question.length - 1,
+			}"
 		>
 			<ArrowForwardCircle class="w-5 ml-2" style="margin: 0px" />
 		</button>
 		<button
 			class="border flex justify-center py-3 bg-white hover:bg-red-600 hover:text-white cursor-pointer select-none w-full"
 			@click="showOver = !showOver"
-			:class="{ hidden: selected != (props.data.history.question.length-1) }"
+			:class="{
+				hidden: selected != props.data.history.question.length - 1,
+			}"
 		>
 			finish
 		</button>
 		<div
 			class="border flex justify-center items-center py-3 bg-white hover:bg-amber-400 hover:text-white cursor-pointer select-none w-full"
 			@click="pin"
-			:class="{ 'bg-amber-400': data.history.question[selected].pin != null }"
+			:class="{
+				'bg-amber-400': data.history.question[selected].pin != null,
+			}"
 		>
-			<Pin v-show="data.history.question[selected].pin == null" class="w-5" />
-			<Pinned v-show="data.history.question[selected].pin != null" class="w-5" />
+			<Pin
+				v-show="data.history.question[selected].pin == null"
+				class="w-5"
+			/>
+			<Pinned
+				v-show="data.history.question[selected].pin != null"
+				class="w-5"
+			/>
 		</div>
 	</div>
-	<ModalBoolFinish :data="data" :overForce="overForce" :show="showOver" @accept="over" @decline="decline" />
+	<ModalBoolFinish
+		:data="data"
+		:overForce="overForce"
+		:show="showOver"
+		@accept="over"
+		@decline="decline"
+	/>
 </template>
 <script type="text/javascript" setup>
 import {
@@ -154,22 +193,19 @@ import {
 	ArrowBackCircle,
 	ArrowForwardCircle,
 } from "@vicons/ionicons5";
-import {
-	Pin,
-	Pinned
-} from "@vicons/tabler";
+import { Pin, Pinned } from "@vicons/tabler";
 // import { ref, watch } from 'vue'
 import { router } from "@inertiajs/inertia-vue3";
 // import Notification from "@/Components/notification/index.vue";
 import ModalBoolFinish from "@/Components/modal/modalBoolFinish.vue";
-import { ref, watch } from "vue";
+import { ref, watch, computed } from "vue";
 
 const props = defineProps({
 	data: Object,
 });
+// console.log(props.data.exam.detected);
 const selected = ref(0);
 const data = ref(props.data);
-console.log(data.value);
 
 function selectedMethod(e) {
 	selected.value = parseInt(e.target.id);
@@ -179,7 +215,11 @@ const count = ref(parseInt(constantMinutes.value / 1000));
 const countdown = ref("");
 const minutes = ref(parseInt(count.value / 60));
 const second = ref(count.value - minutes.value * 60);
+const repeatSet = computed(() => {
+	return props.data.endToken - Date.now();
+});
 const setting = setInterval(function () {
+	constantMinutes.value = repeatSet;
 	if (second.value == 0) {
 		minutes.value = minutes.value - 1;
 		second.value = 59;
@@ -205,7 +245,7 @@ const answer = (choice, question) => {
 			}
 		)
 		.then((output) => {
-			data.value = output.data
+			data.value = output.data;
 			console.log(data.value);
 		});
 };
@@ -220,26 +260,35 @@ const decline = () => {
 	showOver.value = false;
 };
 const overForce = ref(true);
-watch(data, function(){
-	const arr = ref([])
-	for(let index in data.value.history.question){
-		if (data.value.history.question[index].answer != null) {
-			arr.value.push("true")
-		}else{
-			arr.value.push("false")
+watch(
+	data,
+	function () {
+		const arr = ref([]);
+		for (let index in data.value.history.question) {
+			if (data.value.history.question[index].answer != null) {
+				arr.value.push("true");
+			} else {
+				arr.value.push("false");
+			}
 		}
-	}
-	overForce.value = arr.value.includes("false");
-},{ immediate:true })
-function pin(){
-	const pin = data.value.history.question[selected.value]
-	axios.post(route('tokenPin', [props.data.exam_id, props.data.token]),{
-		val: pin
-	})
-	.then((output)=>{
-		data.value = output.data
-	});
+		overForce.value = arr.value.includes("false");
+	},
+	{ immediate: true }
+);
+function pin() {
+	const pin = data.value.history.question[selected.value];
+	axios
+		.post(route("tokenPin", [props.data.exam_id, props.data.token]), {
+			val: pin,
+		})
+		.then((output) => {
+			data.value = output.data;
+		});
 }
+window.addEventListener("blur", function () {
+	over();
+});
+// document.fullScreenElement != null
 </script>
 <style>
 .asd::-webkit-scrollbar {

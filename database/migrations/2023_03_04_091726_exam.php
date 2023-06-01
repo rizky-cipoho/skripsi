@@ -16,14 +16,17 @@ return new class extends Migration
         Schema::create('exams', function(Blueprint $table){
             $table->string('id')->primary();
             $table->string('exam');
-            $table->integer('lesson_id');
+            $table->string('lesson_id');
             $table->string('other')->nullable();
             $table->integer('choice');
+            $table->integer('minimum')->unique();
             $table->string('uni_code')->unique();
             $table->string('key')->nullable();
             $table->string('time_id');
             $table->text('description')->nullable();
-            $table->integer('user_id');
+            $table->string('remove')->nullable();
+            $table->string('tier');
+            $table->string('user_id');
             $table->timestamps();
         });
     }

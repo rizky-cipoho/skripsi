@@ -8,23 +8,28 @@ use App\Models\Exam;
 use App\Traits\ExamTrait;
 use App\Models\Lesson;
 use App\Models\History;
+use App\Models\Point;
 use App\Models\Choice;
 use App\Models\Time;
 use App\Models\TimeStart;
+use App\Models\Session;
 use App\Models\Question;
 use App\Models\QuestionData;
 use App\Models\Exam_Attachment;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Requests\ExamRequest;
-
+use App\Traits\ImageTrait;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Http\Request;
 
 class ExamPageController extends Controller
 {
+    use ImageTrait;
     use ExamTrait;
     public function examReturn($id){
-        $exam = Exam::with('lesson')->with('question', function($question){
+        $exam = Exam::with('lesson')->with('attachment')->with('question', function($question){
             $question->where('remove', null);
+            $question->with('point');
             $question->with('questionData', function($questionData){
                 $questionData->with('questionAttachment');
                 $questionData->where('remove', null);
@@ -45,7 +50,7 @@ class ExamPageController extends Controller
     }
     public function myExam(){
         $lesson = Lesson::get();
-        $exam = Exam::where('user_id', Auth::user()->id)->with('attachment')->with('lesson')->orderBy('id', 'DESC')->get();
+        $exam = Exam::where('user_id', Auth::user()->id)->where('remove',null)->with('attachment')->with('lesson')->orderBy('id', 'DESC')->get();
         return Inertia::render('exam/exam',[
             "exams"=>$exam,
             "lessons"=>$lesson
@@ -81,6 +86,7 @@ class ExamPageController extends Controller
             'lesson_id'=>$lesson->id,
             'time_id'=>$time->id,
             'choice'=>2,
+            'tier'=>'SMA',
             'user_id'=>Auth::user()->id,
         ]);
         $attachment = Exam_Attachment::create([
@@ -93,6 +99,10 @@ class ExamPageController extends Controller
         ]);
         $question = Question::create([
             'exam_id'=>$add->id
+        ]);
+        $point = Point::create([
+            'point'=>10,
+            'question_id'=>$question->id
         ]);
         $questionData = QuestionData::create([
             'question_id'=>$question->id,
@@ -107,25 +117,65 @@ class ExamPageController extends Controller
                 "choice_attachment"=>null
             ]);
         }
-        $get = Exam::where('user_id', Auth::user()->id)->with('attachment')->with('lesson')->orderBy('id', 'DESC')->get();
+        $get = Exam::where('user_id', Auth::user()->id)->where('remove', null)->with('attachment')->with('lesson')->orderBy('id', 'DESC')->get();
         return $get;
     }
     public function selected($id){
         $exam = $this->examReturn($id);
-        // dd($exam);
         $recomendation = $this->recommendations();
         $lessonNotIn = collect(['Lainnya']);
         $lesson = Lesson::whereNotIn('lesson', $lessonNotIn)->get();
         $lessonOther = Lesson::where('lesson', 'Lainnya')->first();
         $historyCount = History::where('exam_id', $exam->id)->count();
-        // $historyCount == 0 ? $historyCount = 0 : $historyCount;
+        $session = Session::with([
+            'history'=>function($history){
+                $history->with([
+                    'question'=>function($question){
+                        $question->with([
+                            'choice'=>function($choice){
+                                $choice->with([
+                                    'choice'=>function($choiceOriginal){
+                                        $choiceOriginal->with('keys');
+                                        $choiceOriginal->with('attachment');
+                                    }
+                                ]);
+                            }
+                        ]);
+                        $question->with([
+                            'question'=>function($questionOriginal){
+                                $questionOriginal->with('point');
+                            }
+                        ]);
+                        $question->with([
+                            'answer'=>function($answer){
+                                $answer->with([
+                                    'choiceHistory'=>function($choice){
+                                        $choice->with('choice');
+                                    }
+                                ]);
+                            }
+                        ]);
+                        $question->with([
+                            'questionData'=>function($questionData){
+                                $questionData->with([
+                                    'questionData'=>function($questionDataOriginal){
+                                        $questionDataOriginal->with('questionAttachment');
+                                    }
+                                ]);
+                            }
+                        ]);
+                    }
+                ]);
+            }
+        ])->where('exam_id', $id)->get();
         return Inertia::render('exam/examSelected',[
             'exam'=>$exam,
             'recommendations'=>$recomendation,
             'lesson'=>$lesson,
             'historyCount'=>$historyCount,
             'lessonOther'=>$lessonOther,
-            'problem'=>$this->examNotReady($id)
+            'problem'=>$this->examNotReady($id),
+            'session'=>$session
         ]);
     }
     public function changeExamName(ExamRequest $request, $id){
@@ -144,6 +194,8 @@ class ExamPageController extends Controller
             $request->validate([
                 'other'=>'required'
             ]);
+            // dd($request->all());
+
             $updateExam = Exam::find($id)->update([
                 'lesson_id'=>$request->id,
                 'other'=>$request->other
@@ -245,6 +297,120 @@ class ExamPageController extends Controller
         $time = Time::find($exam->time_id);
         $timeStart = TimeStart::find($time->time_starts_id)->update([
             'start'=>strtotime($start)*1000
+        ]);
+
+        return [
+            'exam'=>$this->examReturn($id),
+            'problem'=>$this->examNotReady($id)
+        ];
+    }
+    public function myExamHistory($id){
+        $session = Session::with([
+            'history'=>function($history){
+                $history->with([
+                    'question'=>function($question){
+                        $question->with([
+                            'choice'=>function($choice){
+                                $choice->with([
+                                    'choice'=>function($choiceOriginal){
+                                        $choiceOriginal->with('keys');
+                                        $choiceOriginal->with('attachment');
+                                    }
+                                ]);
+                            }
+                        ]);
+                        $question->with([
+                            'question'=>function($questionOriginal){
+                                $questionOriginal->with('point');
+                            }
+                        ]);
+                        $question->with('answer');
+                        $question->with([
+                            'questionData'=>function($questionData){
+                                $questionData->with([
+                                    'questionData'=>function($questionDataOriginal){
+                                        $questionDataOriginal->with('questionAttachment');
+                                    }
+                                ]);
+                            }
+                        ]);
+                    }
+                ]);
+            }
+        ])
+        ->with('exam')
+        ->with('user')
+        ->where('exam_id',$id)->get();
+        // dd($session);
+        return Inertia::render('exam/examHistory', [
+            'session'=>$session
+        ]);
+    }
+    public function tier(Request $request, $id){
+        $tier = exam::find($id)->update([
+            'tier'=>$request->post('val')
+        ]);
+
+        return [
+            'exam'=>$this->examReturn($id),
+            'problem'=>$this->examNotReady($id)
+        ];
+    }
+    public function changeExamDescription(Request $request, $id){
+        $exam = Exam::find($id)->update([
+            'description'=>$request->post('val')
+        ]);
+        return [
+            'exam'=>$this->examReturn($id),
+            'problem'=>$this->examNotReady($id)
+        ];
+    }
+    public function changeExamImage(Request $request, $id){
+        $upload = $this->resize($request->file);
+        $size = Storage::size('/images/'.$upload->basename);
+
+        $exam = Exam::with('attachment')->find($id);
+
+        if ($exam->attachment != null) {
+            $attachment = Exam_Attachment::find($exam->attachment->id)->update([
+                'filename'=>$upload->basename,
+                'path'=>'/images/',
+                'type'=>$upload->extension,
+                'size'=>$size,
+            ]);
+        }else{
+            $attachment = Exam_Attachment::create([
+                'filename'=>$upload->basename,
+                'path'=>'/images/',
+                'type'=>$upload->extension,
+                'size'=>$size,
+                'exam_id'=>$id,
+            ]);
+        }
+        return [
+            'exam'=>$this->examReturn($id),
+            'problem'=>$this->examNotReady($id)
+        ];
+    }
+    public function examRemove($id){
+        $exam = Exam::find($id)->update([
+            'remove'=>'remove'
+        ]);
+        return redirect()->route('myExam');
+    }
+    public function minimum(Request $request, $id){
+        $exam = Exam::find($id)->update([
+            'minimum'=>$request->post('minimum')
+        ]);
+        return [
+            'exam'=>$this->examReturn($id),
+            'problem'=>$this->examNotReady($id)
+        ];
+    }
+    public function detected(Request $request, $id){
+        $request->post('val');
+        $exam = Exam::find($id)->update([
+            'detected'=> $request->post('val') ? 'true' : null
         ]);
 
         return [

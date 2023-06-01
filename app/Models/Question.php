@@ -20,4 +20,8 @@ class Question extends Model
         return $this->hasMany(Choice::class, 'question_id');
     }
 
+    public function point(){
+        return $this->hasOne(Point::class, 'question_id');
+    }
+    
 }

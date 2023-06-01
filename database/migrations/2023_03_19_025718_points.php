@@ -16,7 +16,7 @@ return new class extends Migration
         Schema::create('points', function(Blueprint $table){
             $table->string('id')->primary();
             $table->integer('point');
-            $table->integer('user_id');
+            $table->string('question_id');
             $table->timestamps();
         });
     }

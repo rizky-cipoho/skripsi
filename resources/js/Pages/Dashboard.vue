@@ -14,7 +14,7 @@
                             {{ props.authNow.name }}
                         </p>
                         <p class="leading-none text-lg font-semibold">
-                            Poin. {{ props.authNow.point.point }}
+                            Poin. {{ point() }}
                         </p>
                     </div>
                 </div>
@@ -74,11 +74,13 @@
                 </div>
             </div>
         </div>
-        <RowExamRecommendation
-            :recommendationsData="recommendationsData"
-            :favorite="props.favorite"
-        />
-        <RowExam v-for="seconds in props.seconds" :seconds="seconds" />
+        <div class="pb-32">
+            <RowExamRecommendation
+                :recommendationsData="recommendationsData"
+                :favorite="props.favorite"
+            />
+            <RowExam v-for="seconds in props.seconds" :seconds="seconds" />
+        </div>
         <Modal :show="isOpen" @closeModal="closeModal" />
         <ModalLink
             :show="isOpenLink"
@@ -93,15 +95,6 @@
             @closeModal="closeModal"
         />
     </div>
-    <button @click="check">
-        Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
-        tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim
-        veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea
-        commodo consequat. Duis aute irure dolor in reprehenderit in voluptate
-        velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint
-        occaecat cupidatat non proident, sunt in culpa qui officia deserunt
-        mollit anim id est laborum.
-    </button>
 </template>
 
 <script setup>
@@ -123,7 +116,9 @@ const props = defineProps({
     recommendations: Object,
     seconds: Object,
     ziggy: Object,
+    session: Object,
 });
+
 let form = useForm({
     exam: null,
 });
@@ -133,9 +128,6 @@ const isOpenLink = ref(false);
 const isOpenAlert = ref(false);
 const search = ref("");
 
-// let aa = window.addEventListener("blur", function(){
-// });
-// document.fullScreenElement != null
 let open = ref(false);
 const input = ref({
     search: "",
@@ -171,10 +163,9 @@ function openModal() {
     isOpen.value = true;
 }
 const pending = ref(false);
-const link = ref("/dashboard/exam/");
+const link = ref("/dashboard/exam/else/");
 const searchAxios = function () {
     pending.value = true;
-    link.value = "/dashboard/exam/";
     axios
         .get("/dashboard/search", {
             params: {
@@ -194,7 +185,38 @@ const searchAxios = function () {
         });
 };
 
-const check = computed(() => {
-    console.log(props.auth.user.name);
-});
+function point(point) {
+    let result = 0;
+    let examArr = ref([]);
+    for (let k in props.session) {
+        if (examArr.value.includes(props.session[k].exam_id) == false) {
+            examArr.value.push(props.session[k].exam_id);
+            for (let i in props.session[k].history.question) {
+                if (props.session[k].history.question[i].answer == null) {
+                    continue;
+                }
+                for (let j in props.session[k].history.question[i].choice) {
+                    if (
+                        props.session[k].history.question[i].choice[j].choice
+                            .keys != null
+                    ) {
+                        if (
+                            props.session[k].history.question[i].answer
+                                .choice_id ==
+                            props.session[k].history.question[i].choice[j].id
+                        ) {
+                            result =
+                                result +
+                                parseInt(
+                                    props.session[k].history.question[i]
+                                        .question.point.point
+                                );
+                        }
+                    }
+                }
+            }
+        }
+    }
+    return result;
+}
 </script>

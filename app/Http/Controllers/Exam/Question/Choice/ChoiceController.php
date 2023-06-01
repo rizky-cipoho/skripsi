@@ -24,9 +24,11 @@ class ChoiceController extends Controller
         })->with('choice', function($val){
             $val->where('remove', null);
             $val->with('attachment');
-            $val->with('keys', function($val2){
-                $val2->where('remove', null);
-            });
+            $val->with([
+                'keys'=> function($val2){
+                    $val2->where('remove', null);
+                }
+            ]);
         })->get();
         return [
             'question'=>$question,

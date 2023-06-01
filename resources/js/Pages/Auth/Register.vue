@@ -18,16 +18,60 @@
             </div>
 
             <div class="mt-4">
-                <InputLabel for="email" value="Email" />
+                <InputLabel for="username" value="username" />
                 <TextInput
-                    id="email"
-                    type="email"
+                    id="username"
+                    type="text"
                     class="mt-1 block w-full"
-                    v-model="form.email"
+                    v-model="form.username"
                     required
                     autocomplete="username"
                 />
-                <InputError class="mt-2" :message="form.errors.email" />
+                <InputError class="mt-2" :message="form.errors.username" />
+            </div>
+            <div class="flex grid grid-cols-3">
+                <div class="mt-4 pr-2">
+                    <InputLabel for="date" value="Tanggal Lahir" />
+                    <select
+                        id="date"
+                        type="number"
+                        class="mt-1 block w-full select select-bordered max-w-xs"
+                        v-model="form.date"
+                        required
+                        autocomplete="date"
+                    >
+                        <option v-for="i in 31">{{i}}</option>
+                    </select>
+                    <InputError class="mt-2" :message="form.errors.date" />
+                </div>
+                <div class="mt-4 ">
+                    <InputLabel for="month" value="Bulan Lahir" />
+                    <select
+                        id="month"
+                        type="number"
+                        class="mt-1 block w-full select select-bordered max-w-xs"
+                        v-model="form.month"
+                        required
+                        autocomplete="month"
+                    >
+                        <option v-for="i in 12">{{i}}</option>
+                    </select>
+                    <InputError class="mt-2" :message="form.errors.month" />
+                </div>
+                <div class="mt-4 pl-2">
+                    <InputLabel for="year" value="Tahun Lahir" />
+                    <select
+                        id="year"
+                        type="number"
+                        class="mt-1 block w-full select select-bordered max-w-xs tex-center"
+                        v-model="form.year"
+                        required
+                        autocomplete="year"
+                    >
+                        <option v-for="i in year">{{i}}</option>
+                    </select>
+                    <InputError class="mt-2" :message="form.errors.year" />
+                </div>
             </div>
 
             <div class="mt-4">
@@ -61,7 +105,9 @@
                     :message="form.errors.password_confirmation"
                 />
             </div>
-
+            <div class="text-right text-green-600" v-if="props.alert != null">
+                <small>{{ props.alert }}</small>
+            </div>
             <div class="flex items-center justify-end mt-4">
                 <Link
                     :href="route('login')"
@@ -78,27 +124,45 @@
                 </PrimaryButton>
             </div>
         </form>
+        <Notification :text="props.alert" :show="props.alert" />
     </GuestLayout>
 </template>
 <script setup>
 import GuestLayout from "@/Layouts/GuestLayout.vue";
 import InputError from "@/Components/InputError.vue";
 import InputLabel from "@/Components/InputLabel.vue";
+import Notification from "@/Components/notification/index.vue";
 import PrimaryButton from "@/Components/PrimaryButton.vue";
 import TextInput from "@/Components/TextInput.vue";
 import { Head, Link, useForm } from "@inertiajs/inertia-vue3";
+import { ref, watch } from "vue";
+
+const props = defineProps({
+    alert: String,
+});
+const date = ref("")
 
 const form = useForm({
     name: "",
-    email: "",
+    username: "",
     password: "",
+    date: "",
+    month: "",
+    year: "",
     password_confirmation: "",
     terms: false,
 });
+const now = new Date;
 
+const alert = ref(props.alert);
+const year = ref([])
+for (var i = 1980; i <= now.getFullYear()-5; i++) {
+    year.value.push(i)
+}
 const submit = () => {
     form.post(route("register"), {
-        onFinish: () => form.reset("password", "password_confirmation"),
+        onFinish: (output) => form.reset("password", "password_confirmation"),
+        // onFinish: (output) => form.reset(),
     });
 };
 const title = "Register";

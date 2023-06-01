@@ -17,7 +17,7 @@ return new class extends Migration
             $table->string('id')->primary();
             $table->string('choice_id');
             $table->string('history_question_id');
-            $table->integer('user_id');
+            $table->string('user_id');
             $table->timestamps();
         });
     }

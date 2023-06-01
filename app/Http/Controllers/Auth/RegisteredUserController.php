@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Models\Point;
 use App\Providers\RouteServiceProvider;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\Request;
@@ -36,21 +37,25 @@ class RegisteredUserController extends Controller
     {
         $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users',
+            'username' => 'required|string|max:255|unique:users',
+            'date' => 'required',
+            'month' => 'required',
+            'year' => 'required',
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
         ]);
 
+
+        $curent = strtotime($request->post('date')."-".$request->post('month')."-".$request->post('year'))*1000;
+
         $user = User::create([
             'name' => $request->name,
-            'email' => $request->email,
+            'username' => $request->username,
+            'birth' => $curent,
+            'point' => 0,
             'password' => Hash::make($request->password),
         ]);
 
-        event(new Registered($user));
-
-        Auth::login($user);
-
-        return redirect(RouteServiceProvider::HOME);
+        return redirect()->route('login')->with('message','Akun berhasil di buat');
     }
     public function guestLogin(){
         $rand = (string)rand(10000, 99999);

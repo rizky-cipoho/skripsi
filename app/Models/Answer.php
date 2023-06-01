@@ -12,4 +12,7 @@ class Answer extends Model
     use HasFactory;
     protected $fillable = ['choice_id', 'history_question_id', 'user_id'];
     
+    public function choiceHistory(){
+        return $this->belongsTo(HistoryChoice::class, 'choice_id');
+    }
 }
