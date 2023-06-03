@@ -19,7 +19,7 @@ return new class extends Migration
             $table->string('lesson_id');
             $table->string('other')->nullable();
             $table->integer('choice');
-            $table->integer('minimum')->unique();
+            $table->integer('minimum')->nullable();
             $table->string('uni_code')->unique();
             $table->string('key')->nullable();
             $table->string('time_id');

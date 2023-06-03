@@ -14,33 +14,35 @@
 				</div>
 				<div>
 					<div
-						class="w-24 h-24 bg-cover rounded-full bg-center"
+						class="md:w-24 md:h-24 max-md:w-14 max-md:h-14 bg-cover rounded-full bg-center"
 						:class="[
-							{ 'w-36 h-36': index == 0 },
-							{ 'w-32 h-32': index == 1 },
-							{ 'w-28 h-28': index == 2 },
+							{ 'md:w-36 md:h-36 max-md:w-24 max-md:h-24': index == 0 },
+							{ 'md:w-32 md:h-32 max-md:w-20 max-md:h-20': index == 1 },
+							{ 'md:w-28 md:h-28 max-md:w-16 max-md:h-16': index == 2 },
 						]"
 						style="background-image: url('/image/rasberry.jpg')"
 					></div>
 				</div>
-				<div class="px-10">
+				<div class="md:px-10 max-md:px-5">
 					<p
-						class="break-words w-48 text-center font-black"
+						class="break-words md:w-48 max-md:w-full text-center font-black"
 						:class="[
-							{ 'text-2xl font-bold': index == 0 },
-							{ 'text-xl font-bold': index == 1 },
-							{ 'text-lg font-bold': index == 2 },
+							{ 'md:text-2xl max-md:text-xl font-bold': index == 0 },
+							{ 'md:text-xl max-md:text-lg font-bold': index == 1 },
+							{ 'md:text-lg max-md:text-base font-bold': index == 2 },
+							{ 'md:text-base max-md:text-sm font-bold': index > 2 },
 						]"
 					>
 						{{ person.name.name }}
 					</p>
 				</div>
-				<div class="px-10">
+				<div class="md:px-10">
 					<p class="font-black"
 											:class="[
-							{ 'text-2xl font-bold': index == 0 },
-							{ 'text-xl font-bold': index == 1 },
-							{ 'text-lg font-bold': index == 2 },
+							{ 'md:text-2xl max-md:text-xl font-bold': index == 0 },
+							{ 'md:text-xl max-md:text-lg font-bold': index == 1 },
+							{ 'md:text-lg max-md:text-base font-bold': index == 2 },
+							{ 'md:text-base max-md:text-sm font-bold': index > 2 },
 						]"
 					>Point. {{ person.point }}</p>
 				</div>

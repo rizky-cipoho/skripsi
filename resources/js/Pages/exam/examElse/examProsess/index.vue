@@ -1,5 +1,10 @@
 <template>
-	<div class="px-32 py-24">
+	<div
+		class="h-screen w-full fixed"
+		style="z-index: 999999999"
+		v-show="disableScreen"
+	></div>
+	<div class="md:px-32 md:py-24 max-md:px-16 max-md:py-20">
 		<div
 			v-for="(question, index) in data.history.question"
 			:key="index"
@@ -7,9 +12,7 @@
 		>
 			<div class="border-b-4 border-gray-700 p-5 mb-10">
 				<div class="flex justify-between">
-					<div class="text-xl font-semibold">
-						Soal {{ index + 1 }}
-					</div>
+					<div class="text-xl font-semibold">Soal {{ index + 1 }}</div>
 					<div>{{ countdown }}</div>
 				</div>
 				<br />
@@ -24,10 +27,8 @@
 						<div class="border p-3 rounded">
 							<img
 								:src="
-									questionData.question_data
-										.question_attachment.path +
-									questionData.question_data
-										.question_attachment.filename
+									questionData.question_data.question_attachment.path +
+									questionData.question_data.question_attachment.filename
 								"
 							/>
 						</div>
@@ -48,9 +49,7 @@
 					<button
 						class="flex items-center cursor-pointer text-red-600 hover:scale-105 duration-150 select-none"
 						:class="{
-							hidden:
-								selected ==
-								props.data.history.question.length - 1,
+							hidden: selected == props.data.history.question.length - 1,
 						}"
 						@click="selected++"
 					>
@@ -60,9 +59,7 @@
 					<button
 						class="flex items-center cursor-pointer text-red-600 hover:scale-105 duration-150"
 						:class="{
-							hidden:
-								selected !=
-								props.data.history.question.length - 1,
+							hidden: selected != props.data.history.question.length - 1,
 						}"
 						@click="showOver = !showOver"
 					>
@@ -112,7 +109,9 @@
 			</div>
 		</div>
 	</div>
-	<div class="border border-gray-700 fixed right-0 top-[20%] w-20">
+	<div
+		class="border border-gray-300 fixed right-0 top-[20%] md:w-20 max-md:w-14"
+	>
 		<div class="h-[15rem] px-2 py-3 overflow-auto asd">
 			<div
 				class="border h-fit text-center w-full py-2 mb-2 cursor-pointer hover:bg-red-600 hover:text-white select-none"
@@ -122,11 +121,7 @@
 					{ 'bg-gray-700 text-white': question.answer != null },
 					{
 						'bg-amber-400 text-black':
-							question.pin == null
-								? false
-								: i == selected
-								? false
-								: true,
+							question.pin == null ? false : i == selected ? false : true,
 					},
 					{ 'bg-red-600 text-white': i == selected },
 				]"
@@ -159,7 +154,7 @@
 				hidden: selected != props.data.history.question.length - 1,
 			}"
 		>
-			finish
+			Selesai
 		</button>
 		<div
 			class="border flex justify-center items-center py-3 bg-white hover:bg-amber-400 hover:text-white cursor-pointer select-none w-full"
@@ -168,10 +163,7 @@
 				'bg-amber-400': data.history.question[selected].pin != null,
 			}"
 		>
-			<Pin
-				v-show="data.history.question[selected].pin == null"
-				class="w-5"
-			/>
+			<Pin v-show="data.history.question[selected].pin == null" class="w-5" />
 			<Pinned
 				v-show="data.history.question[selected].pin != null"
 				class="w-5"
@@ -203,6 +195,7 @@ import { ref, watch, computed } from "vue";
 const props = defineProps({
 	data: Object,
 });
+const disableScreen = ref(false);
 // console.log(props.data.exam.detected);
 const selected = ref(0);
 const data = ref(props.data);
@@ -237,19 +230,17 @@ const setting = setInterval(function () {
 }, 1000);
 const answer = (choice, question) => {
 	axios
-		.post(
-			route("getDataTokenChoice", [props.data.exam_id, props.data.token]),
-			{
-				choice: choice,
-				historyQuestionId: question,
-			}
-		)
+		.post(route("getDataTokenChoice", [props.data.exam_id, props.data.token]), {
+			choice: choice,
+			historyQuestionId: question,
+		})
 		.then((output) => {
 			data.value = output.data;
 			console.log(data.value);
 		});
 };
 const over = () => {
+	disableScreen.value = true;
 	window.location.href = route("tokenOver", [
 		props.data.exam_id,
 		props.data.token,
@@ -285,10 +276,15 @@ function pin() {
 			data.value = output.data;
 		});
 }
+const fail = ref(0);
 window.addEventListener("blur", function () {
-	over();
+		fail.value++
+	});
+watch(fail, () => {
+	if (fail.value == 3) {
+		over();
+	}
 });
-// document.fullScreenElement != null
 </script>
 <style>
 .asd::-webkit-scrollbar {

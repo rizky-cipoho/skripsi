@@ -65,7 +65,7 @@ const props = defineProps({
 	index: Number,
 	session: Object,
 });
-
+console.log(props.question.choice)
 onMounted(() => {
 	chartData.value = setChartData();
 });

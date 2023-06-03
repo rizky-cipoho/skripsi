@@ -1,21 +1,32 @@
 <template>
 	<Navbar
-		:name="props.auth.user.name"
+		:user="props.auth.user"
 		:ziggy="props.ziggy"
 		:examSelected="examSelected"
 	/>
 	<div class="px-10">
 		<!-- <div class="bg-green-500 mt-5 py-2 px-10 font-semibold text-white rounded">Ujian Siap</div> -->
 	</div>
-	<div class="px-10 py-5 flex justify-between">
-		<div class="w-10/12 pr-10">
+	<div
+		class="fixed bg-red-600 bottom-[5%] right-[5%] rounded-full p-3 hover:bg-gray-700 text-white hover:-rotate-90 transition duration-300 cursor-pointer md:hidden "
+		@click="setting = !setting"
+		style="z-index: 9999"
+	>
+		<SettingsOutline class="w-5" v-show="setting == false" />
+		<CloseOutline class="w-5" v-show="setting == true" />
+	</div>
+
+	<div class="px-10 py-5 flex justify-between md:mt-5">
+		<div class="md:w-10/12 md:pr-10 max-md:w-full">
 			<div class="px-5 py-5 bg-gray-100 rounded shadow">
-				<div class="flex w-full">
+				<div class="md:flex w-full">
 					<div>
-						<div
-							class="h-36 w-36 bg-cover rounded bg-center hover:bg"
-							:style="`background-image: url('${examData.attachment.path}${examData.attachment.filename}')`"
-						></div>
+						<div class="flex justify-center">
+							<div
+								class="h-36 w-36 bg-cover rounded bg-center hover:bg"
+								:style="`background-image: url('${examData.attachment.path}${examData.attachment.filename}')`"
+							></div>
+						</div>
 						<button
 							class="shadow justify-center bg-red-600 hover:bg-gray-700 text-white mt-2 rounded font-semibold focus:outline-none tracking-widest active:bg-red-600 focus:shadow-outline-gray transition ease-in-out duration-250 inline-flex block mb-1 w-full mt-4 cursor-pointer"
 						>
@@ -30,11 +41,11 @@
 						</button>
 					</div>
 
-					<div class="px-5 w-10/12">
+					<div class="px-5 md:w-10/12">
 						<div class="flex items-center w-full">
 							<div class="max-w-64">
 								<p
-									class="text-lg font-semibold textlimit mr-4 flex-auto w-auto"
+									class="text-lg font-semibold textlimit mr-4 flex-auto w-auto max-md:my-3"
 								>
 									{{ examData.exam }}
 								</p>
@@ -90,10 +101,6 @@
 									<small class="px-2">{{
 										examData.key == null ? "Tidak Pakai Kunci" : "Pakai Kunci"
 									}}</small>
-								</div>
-								<div class="flex">
-									<TimeOutline class="w-4 text-red-600" />
-									<small class="px-2">{{ examData.time.duration }} Menit</small>
 								</div>
 								<div class="flex">
 									<TimeOutline class="w-4 text-red-600" />
@@ -178,146 +185,149 @@
 				:index="index"
 			/>
 		</div>
-
-		<div class="text-center w-3/12">
-			<Problem :problem="problem" />
-			<div>
-				<p class="font-bold text-lg">Pelajaran</p>
-				<form>
-					<div class="h-44 overflow-y-scroll my-4">
+		<div class="max-md:h-screen max-md:w-full max-md:bg-white max-md:fixed max-md:top-0 max-md:left-0 max-md:overflow-y-scroll max-md:p-20 md:w-3/12" 
+		:class="{ 'max-md:hidden':setting == false }"
+		>
+			<div class="text-center md:w-full">
+				<Problem :problem="problem" />
+				<div>
+					<p class="font-bold text-lg">Pelajaran</p>
+					<form>
+						<div class="h-44 overflow-y-scroll my-4">
+							<div
+								class="flex items-center hover:bg-gray-100 cursor-pointer px-3 rounded"
+								v-for="(lesson, index) in props.lesson"
+							>
+								<input
+									type="radio"
+									:id="lesson.id"
+									name="lesson"
+									class="w-6 cursor-pointer radio radio-error"
+									:value="lesson.id"
+									v-model="selected"
+									@change="selectedLesson"
+								/>
+								<label
+									class="px-2 w-full py-2 cursor-pointer text-left select-none"
+									:for="lesson.id"
+									>{{ lesson.lesson }}</label
+								>
+							</div>
+						</div>
 						<div
 							class="flex items-center hover:bg-gray-100 cursor-pointer px-3 rounded"
-							v-for="(lesson, index) in props.lesson"
 						>
 							<input
 								type="radio"
-								:id="lesson.id"
+								:id="props.lessonOther.id"
 								name="lesson"
-								class="w-4 cursor-pointer"
-								:value="lesson.id"
-								v-model="selected"
+								class="w-6 cursor-pointer radio radio-error"
+								:value="props.lessonOther.id"
 								@change="selectedLesson"
+								v-model="selected"
 							/>
 							<label
 								class="px-2 w-full py-2 cursor-pointer text-left select-none"
-								:for="lesson.id"
-								>{{ lesson.lesson }}</label
+								:for="props.lessonOther.id"
+								>{{ props.lessonOther.lesson }}</label
 							>
+							<input
+								type=""
+								name=""
+								class="w-36 border-b-2 border-gray-700 active:border-0 focus:border-0 rounded"
+								@click="examlessonChange = !examlessonChange"
+								v-model="other"
+								readonly
+							/>
 						</div>
-					</div>
+					</form>
+				</div>
+				<div class="mt-3">
+					<p class="font-bold text-lg">Diperuntukkan Untuk</p>
 					<div
-						class="flex items-center hover:bg-gray-100 cursor-pointer px-3 rounded"
+						class="flex flex-wrap py-2"
+						v-for="(tier, index) in tierExam"
+						:key="index"
 					>
 						<input
+							class="radio radio-error w-6"
 							type="radio"
-							:id="props.lessonOther.id"
-							name="lesson"
-							class="w-4 cursor-pointer"
-							:value="props.lessonOther.id"
-							@change="selectedLesson"
-							v-model="selected"
+							name="tier"
+							:value="tier"
+							v-model="tierModel"
 						/>
-						<label
-							class="px-2 w-full py-2 cursor-pointer text-left select-none"
-							:for="props.lessonOther.id"
-							>{{ props.lessonOther.lesson }}</label
-						>
+						<p class="w-10/12">Tingkat {{ tier }}</p>
+					</div>
+				</div>
+				<div class="mt-3">
+					<p class="font-bold text-lg">Durasi ujian</p>
+					<div
+						class="flex flex-wrap py-2 items-center"
+						v-for="(duration, index) in durations"
+						:key="index"
+					>
 						<input
-							type=""
-							name=""
-							class="w-36 border-b-2 border-gray-700 active:border-0 focus:border-0 rounded"
-							@click="examlessonChange = !examlessonChange"
-							v-model="other"
-							readonly
+							class="radio radio-error w-6"
+							type="radio"
+							name="duration"
+							:value="duration"
+							v-model="durationTime"
+						/>
+						<label class="w-10/12">{{ duration }} Menit</label>
+					</div>
+				</div>
+
+				<div class="mt-3">
+					<p class="font-bold text-lg">KKM Ujian</p>
+					<div class="flex flex-wrap py-2 justify-center">
+						<p class="w-11/12">
+							Nilai.
+							<input
+								:value="minimumModel"
+								@input="inputNumberAbs"
+								v-debounce:300="submitMinimum"
+								class="w-10 border border-gray-300 rounded text-center"
+								name=""
+							/>
+						</p>
+						<small class="text-center text-red-600" v-show="minimumAlert"
+							>error: angkah tidah boleh lebih dari 100</small
+						>
+					</div>
+				</div>
+				<div class="mt-3">
+					<p class="font-bold text-lg">Jam mulai ujian</p>
+					<input
+						class="checkbox"
+						type="checkbox"
+						id="start"
+						:checked="startExamCheckBox"
+						v-model="startExamCheckBox"
+					/>
+					<label class="px-2" for="start">Pakai Jam Mulai?</label>
+					<div
+						class="flex justify-center py-2"
+						v-if="examData.time.start != null"
+					>
+						<input
+							class=""
+							type="datetime-local"
+							:value="timeStart"
+							@change="dateTime"
 						/>
 					</div>
-				</form>
-			</div>
-			<div class="mt-3">
-				<p class="font-bold text-lg">Diperuntukkan Untuk</p>
-				<div
-					class="flex flex-wrap py-2"
-					v-for="(tier, index) in tierExam"
-					:key="index"
-				>
-					<input
-						class="radio radio-error w-1/12"
-						type="radio"
-						name="tier"
-						:value="tier"
-						v-model="tierModel"
-					/>
-					<p class="w-11/12">Tingkat {{ tier }}</p>
 				</div>
-			</div>
-			<div class="mt-3">
-				<p class="font-bold text-lg">Durasi ujian</p>
-				<div
-					class="flex flex-wrap py-2"
-					v-for="(duration, index) in durations"
-					:key="index"
-				>
-					<input
-						class="radio radio-error w-1/12"
-						type="radio"
-						name="duration"
-						:value="duration"
-						v-model="durationTime"
-					/>
-					<p class="w-11/12">{{ duration }} Menit</p>
-				</div>
-			</div>
-
-			<div class="mt-3">
-				<p class="font-bold text-lg">KKM Ujian</p>
-				<div class="flex flex-wrap py-2 justify-center">
-					<p class="w-11/12">
-						Nilai.
+				<div class="mt-3">
+					<p class="font-bold text-lg">Kunci ujian</p>
+					<div>
 						<input
-							:value="minimumModel"
-							@input="inputNumberAbs"
-							v-debounce:300="submitMinimum"
-							class="w-10 border border-gray-300 rounded text-center"
+							class="input border border-gray-300 text-center h-[2rem]"
 							name=""
+							v-model="key"
+							readonly
+							@click="keyModal = !keyModal"
 						/>
-					</p>
-					<small class="text-center text-red-600" v-show="minimumAlert"
-						>error: angkah tidah boleh lebih dari 100</small
-					>
-				</div>
-			</div>
-			<div class="mt-3">
-				<p class="font-bold text-lg">Jam mulai ujian</p>
-				<input
-					class="checkbox"
-					type="checkbox"
-					id="start"
-					:checked="startExamCheckBox"
-					v-model="startExamCheckBox"
-				/>
-				<label class="px-2" for="start">Pakai Jam Mulai?</label>
-				<div
-					class="flex justify-center py-2"
-					v-if="examData.time.start != null"
-				>
-					<input
-						class=""
-						type="datetime-local"
-						:value="timeStart"
-						@change="dateTime"
-					/>
-				</div>
-			</div>
-			<div class="mt-3">
-				<p class="font-bold text-lg">Kunci ujian</p>
-				<div>
-					<input
-						class="input border border-gray-300 text-center h-[2rem]"
-						name=""
-						v-model="key"
-						readonly
-						@click="keyModal = !keyModal"
-					/>
+					</div>
 				</div>
 			</div>
 		</div>
@@ -397,6 +407,8 @@ import {
 	Pencil,
 	Analytics,
 	AddCircleOutline,
+	SettingsOutline,
+	CloseOutline,
 } from "@vicons/ionicons5";
 import { ref, watch, onMounted, onUpdated } from "vue";
 import Chart from "primevue/chart";
@@ -412,7 +424,6 @@ const props = defineProps({
 	problem: Object,
 	session: Object,
 });
-// console.log(props.exam);
 const key = ref(props.exam.key);
 const keyModal = ref(false);
 const keyPending = ref(false);
@@ -425,7 +436,6 @@ function keySave(val) {
 		})
 		.then((output) => {
 			key.value = output.data.key;
-			// console.log(output.data);
 			keyPending.value = false;
 			keyModal.value = false;
 		})
@@ -503,6 +513,7 @@ const changeExam = (val) => {
 			},
 		})
 		.then((result) => {
+			console.log(examData.value);
 			examNamePending.value = false;
 			examNameChange.value = false;
 			examData.value = null;
@@ -534,8 +545,6 @@ const selected = ref(props.exam.lesson_id);
 
 watch(selected, () => {
 	selected.value = selected.value;
-	// console.log(selected.value)
-	// console.log(props.exam)
 });
 
 const selectedLesson = (val) => {
@@ -600,51 +609,47 @@ const selectedLesson = (val) => {
 const otherLesson = () => {};
 const timeStart = ref();
 const date = ref();
-watch(
-	examData,
-	() => {
-		if (examData.value.time.start != null) {
-			if (examData.value.time.start_time.start != null) {
-				date.value = new Date(examData.value.time.start_time.start);
-				const mounth = ref(date.value.getMonth());
-				const minutes = ref(date.value.getMinutes());
-				const datee = ref(date.value.getDate());
-				const hours = ref(date.value.getHours());
+watch(examData, () => {}, { immediate: true });
+function timeStartFunction() {
+	if (examData.value.time.start != null) {
+		if (examData.value.time.start_time.start != null) {
+			date.value = new Date(examData.value.time.start_time.start);
+			const mounth = ref(date.value.getMonth());
+			const minutes = ref(date.value.getMinutes());
+			const datee = ref(date.value.getDate());
+			const hours = ref(date.value.getHours());
 
-				const lengthMonth = ref(
-					(mounth.value = mounth.value.toString().length)
-				);
-				const lengthMinutes = ref(
-					(minutes.value = minutes.value.toString().length)
-				);
-				const lengthDate = ref((datee.value = datee.value.toString().length));
-				const lengthHours = ref((hours.value = hours.value.toString().length));
-				const sum = ref(date.value.getMonth() + 1);
+			const lengthMonth = ref((mounth.value = mounth.value.toString().length));
+			const lengthMinutes = ref(
+				(minutes.value = minutes.value.toString().length)
+			);
+			const lengthDate = ref((datee.value = datee.value.toString().length));
+			const lengthHours = ref((hours.value = hours.value.toString().length));
+			const sum = ref(date.value.getMonth() + 1);
 
-				timeStart.value = `${date.value.getFullYear()}-${
-					lengthMonth.value == 1 ? "0" + sum.value : date.value.getMonth() + 1
-				}-${
-					lengthDate.value == 1
-						? "0" + date.value.getDate()
-						: date.value.getDate()
-				}T${
-					lengthHours.value == 1
-						? "0" + date.value.getHours()
-						: date.value.getHours()
-				}:${
-					lengthMinutes.value == 1
-						? "0" + date.value.getMinutes()
-						: date.value.getMinutes()
-				}`;
-			} else {
-				date.value = null;
-			}
+			timeStart.value = `${date.value.getFullYear()}-${
+				lengthMonth.value == 1 ? "0" + sum.value : date.value.getMonth() + 1
+			}-${
+				lengthDate.value == 1
+					? "0" + date.value.getDate()
+					: date.value.getDate()
+			}T${
+				lengthHours.value == 1
+					? "0" + date.value.getHours()
+					: date.value.getHours()
+			}:${
+				lengthMinutes.value == 1
+					? "0" + date.value.getMinutes()
+					: date.value.getMinutes()
+			}`;
 		} else {
 			date.value = null;
 		}
-	},
-	{ immediate: true }
-);
+	} else {
+		date.value = null;
+	}
+}
+timeStartFunction();
 const dateTime = (e) => {
 	setTimeout(function () {
 		axios
@@ -655,6 +660,7 @@ const dateTime = (e) => {
 				examData.value = output.data.exam;
 				problem.value = [];
 				problem.value.push(...output.data.problem);
+				timeStartFunction();
 			});
 	}, 300);
 };
@@ -745,8 +751,7 @@ function inputNumberAbs(e) {
 	val = val.replace(/^0+|[^\d.]/g, "");
 	minimumModel.value = val;
 }
-function submitMinimum (e) {
-	console.log(e == "")
+function submitMinimum(e) {
 	if (parseInt(e) <= 100 || e == "") {
 		pending.value = true;
 		minimumAlert.value = false;
@@ -755,31 +760,30 @@ function submitMinimum (e) {
 				minimum: parseInt(e),
 			})
 			.then((output) => {
-		pending.value = false;
+				pending.value = false;
 				examData.value = output.data.exam;
 				problem.value = [];
 				problem.value.push(...output.data.problem);
 			});
-	}else{
+	} else {
 		minimumAlert.value = true;
 	}
-};
+}
 
 onMounted(() => {
 	chartData.value = setChartData();
 });
 const passed = ref(0);
 const fail = ref(0);
-passed.value = 0
-		fail.value = 0
-		console.log("aku disini");
-		for (var i in props.session) {
-			if (examData.value.minimum <= props.session[i].rate) {
-				passed.value++;
-			} else {
-				fail.value++;
-			}
-		}
+passed.value = 0;
+fail.value = 0;
+for (var i in props.session) {
+	if (examData.value.minimum <= props.session[i].rate) {
+		passed.value++;
+	} else {
+		fail.value++;
+	}
+}
 const chartOptions = ref({
 	plugins: {
 		legend: {
@@ -813,6 +817,7 @@ watch(detected, () => {
 			problem.value.push(...output.data.problem);
 		});
 });
+let setting = ref(false);
 </script>
 <style>
 .v-enter-active,

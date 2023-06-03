@@ -1,5 +1,5 @@
 <template>
-	<Navbar :name="props.auth.user.name" :ziggy="props.ziggy" />
+	<Navbar :user="props.auth.user" :ziggy="props.ziggy" />
 	<div
 		class="flex justify-center px-20 py-10 z-50"
 		v-if="props.session.length != 0"

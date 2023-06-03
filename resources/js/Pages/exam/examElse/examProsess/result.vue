@@ -1,6 +1,6 @@
 <template>
 	<div>
-		<Navbar :name="props.auth.user.name" :ziggy="props.ziggy" />
+		<Navbar :user="props.auth.user" :ziggy="props.ziggy" />
 		<div class="flex justify-center px-40 py-5">
 			<div class="alert alert-warning shadow-lg" v-if="props.alert">
 				<div>
@@ -21,7 +21,7 @@
 				</div>
 			</div>
 		</div>
-		<div class="flex justify-center px-40 py-5">
+		<div class="flex justify-center md:px-40 max-md:px-10 py-5">
 			<div class="alert">
 				<div>
 					<svg
@@ -42,28 +42,40 @@
 			</div>
 		</div>
 		<div
-			class="flex justify-center px-40"
+			class="flex justify-center md:px-40 max-md:px-10"
 			:class="{ 'py-20': props.alert == false }"
 		>
 			<div class="">
-				<div class="px-5 py-3 flex justify-center">
-					<div class="px-10 text-center border-r border-gray-600">
+				<div
+					class="px-5 py-3 flex md:justify-center max-md:grid max-md:grid-cols-2"
+				>
+					<div
+						class="max-md:px-20 md:px-10 text-center md:border-r border-gray-600"
+					>
 						<div class="flex justify-center items-center">
-							<CheckmarkCircle class="text-green-600 w-7" />
+							<div>
+								<CheckmarkCircle class="text-green-600 w-7" />
+							</div>
 							<p class="px-1 text-3xl">{{ trueCount }}</p>
 						</div>
 						<small> Benar </small>
+						<hr class="md:hidden border border-gray-500 my-3" />
 					</div>
-					<div class="px-10 text-center border-r border-gray-600">
+					<div
+						class="max-md:px-20 md:px-10 text-center md:border-r border-gray-600"
+					>
 						<div class="flex justify-center items-center">
-							<CloseCircle class="text-red-600 w-7" />
+							<div>
+								<CloseCircle class="text-red-600 w-7" />
+							</div>
 							<p class="px-1 text-3xl">
 								{{ question.length - trueCount }}
 							</p>
 						</div>
 						<small> Salah </small>
+						<hr class="md:hidden border border-gray-500 my-3" />
 					</div>
-					<div class="px-10 text-center border-r border-gray-600">
+					<div class="px-10 text-center md:border-r border-gray-600">
 						<div class="flex justify-center items-center">
 							<p>Nilai.</p>
 							<p class="px-1 text-3xl">
@@ -89,20 +101,28 @@
 					</div>
 				</div>
 				<div class="flex justify-center">
-					<div class="flex items-center px-5 py-5">
-						<NavigateCircleSharp class="w-7 mx-1 text-green-600" />
-						Yang di pilih benar
+					<div class="md:flex items-center justify-center text-center px-5 py-5">
+						<div class="flex justify-center">
+							<NavigateCircleSharp class="w-7 mx-1 text-green-600" />
+						</div>
+						<p>Yang di pilih benar</p>
 					</div>
-					<div class="flex items-center px-5 py-5">
+					<div class="md:flex text-center items-center px-5 py-5">
+						<div class="flex justify-center">
 						<CheckmarkCircle class="w-7 mx-1 text-green-600" />
+					</div>
 						Kunci jawaban
 					</div>
-					<div class="flex items-center px-5 py-5">
+					<div class="md:flex text-center items-center px-5 py-5">
+						<div class="flex justify-center">
 						<NavigateCircleSharp class="w-7 mx-1 text-red-600" />
+					</div>
 						Yang di pilih salah
 					</div>
-					<div class="flex items-center px-5 py-5">
+					<div class="md:flex text-center items-center px-5 py-5">
+						<div class="flex justify-center">
 						<CloseCircle class="w-7 mx-1 text-red-600" />
+					</div>
 						Salah
 					</div>
 				</div>
@@ -117,11 +137,7 @@
 							<div>Point. {{ data.question.point.point }}</div>
 						</div>
 						<div v-for="(questionDataUnit, index) in data.question_data">
-							<div
-								v-if="
-									questionDataUnit.question_data.type == 'paragraph'
-								"
-							>
+							<div v-if="questionDataUnit.question_data.type == 'paragraph'">
 								<p>{{ questionDataUnit.question_data.data }}</p>
 							</div>
 							<div
@@ -130,10 +146,8 @@
 							>
 								<img
 									:src="
-										questionDataUnit.question_data.question_attachment
-											.path +
-										questionDataUnit.question_data.question_attachment
-											.filename
+										questionDataUnit.question_data.question_attachment.path +
+										questionDataUnit.question_data.question_attachment.filename
 									"
 								/>
 							</div>
@@ -141,17 +155,13 @@
 
 						<div>
 							<div class="flex grid grid-cols-2">
-								<div
-									class="my-5"
-									v-for="(choice, index) in data.choice"
-								>
+								<div class="my-5" v-for="(choice, index) in data.choice">
 									<div
 										v-if="choice.choice.choice_attachment == null"
 										class="flex items-center px-5"
 										:class="[
 											{
-												'text-green-600':
-													choice.choice.keys != null,
+												'text-green-600': choice.choice.keys != null,
 											},
 											{
 												'text-red-600': choice.choice.keys == null,
@@ -163,9 +173,7 @@
 												<NavigateCircleSharp class="w-7" />
 											</div>
 											<div v-else-if="choice.choice.keys != null">
-												<CheckmarkCircle
-													class="w-7 text-green-600"
-												/>
+												<CheckmarkCircle class="w-7 text-green-600" />
 											</div>
 											<div v-else>
 												<CloseCircle class="w-7" />
@@ -188,12 +196,10 @@
 													class="w-7"
 													:class="[
 														{
-															'text-green-600':
-																choice.choice.keys != null,
+															'text-green-600': choice.choice.keys != null,
 														},
 														{
-															'text-red-600':
-																choice.choice.keys == null,
+															'text-red-600': choice.choice.keys == null,
 														},
 													]"
 												/>
@@ -256,12 +262,11 @@ for (let unit in props.histories.history.question) {
 	const answer = props.histories.history.question[unit].answer.choice_id;
 	for (let unitChoice in props.histories.history.question[unit].choice) {
 		if (
-			props.histories.history.question[unit].choice[unitChoice].choice
-				.keys != null
+			props.histories.history.question[unit].choice[unitChoice].choice.keys !=
+			null
 		) {
 			if (
-				answer ==
-				props.histories.history.question[unit].choice[unitChoice].id
+				answer == props.histories.history.question[unit].choice[unitChoice].id
 			) {
 				trueCount.value++;
 			}

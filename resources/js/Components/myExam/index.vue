@@ -1,8 +1,8 @@
 <template>
 	<div class="max-w-full">
 		<div class="card bg-base-100 shadow-xl image-full">
-			<figure><div class="bg-cover w-full h-full bg-cover bg-center" :style="{'background-image': `url(${props.exam.attachment.image})`}"></div></figure>
-			<div class="card-body px-5 py-5 w-64">
+			<figure><div class="bg-cover w-full h-full bg-cover bg-center" :style="`background-image: url('${props.exam.attachment.path}${props.exam.attachment.filename}')`"></div></figure>
+			<div class="card-body px-5 py-5">
 				<p class=" text-xl w-auto textlimit flex-auto">{{ props.exam.exam }}</p>
 				<p class="">({{ props.exam.lesson.lesson }})</p>
 				<small>{{ props.exam.uni_code }} </small>

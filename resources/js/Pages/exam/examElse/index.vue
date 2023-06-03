@@ -1,6 +1,6 @@
 <template>
 	<div class="pb-32">
-		<Navbar :name="props.auth.name" :ziggy="props.ziggy" />
+		<Navbar :user="props.auth.user" :ziggy="props.ziggy" />
 		<div class="px-10 pt-10">
 			<div
 				class="alert alert-error shadow-lg mb-5"
@@ -34,8 +34,8 @@
 			<h1 class="text-2xl pb-5 font-semibold px-10 text-center">
 				Informasi Ujian
 			</h1>
-			<div class="flex justify-center">
-				<div class="w-6/12">
+			<div class="md:flex md:justify-center">
+				<div class="md:w-6/12">
 					<div class="shadow border border-gray-10 rounded h-fit">
 						<div class="flex grid grid-cols-3 w-full">
 							<div
@@ -96,7 +96,8 @@
 					</div>
 					<!-- <a :href="route('createSession', props.exam.id)"> -->
 					<button
-						class="bg-red-600 text-white py-3 mt-4 px-2 rounded font-semibold hover:bg-gray-700 focus:outline-none tracking-widest active:bg-gray-900 focus:shadow-outline-gray transition ease-in-out duration-150 mb-1 w-full text-center"
+						class="bg-red-600 text-white py-3 mt-4 px-2 rounded font-semibold hover:bg-gray-700 focus:outline-none tracking-widest active:bg-gray-900 focus:shadow-outline-gray transition ease-in-out duration-150 mb-1 w-full text-center max-md:hidden"
+
 						:class="[
 							{
 								'opacity-50 cursor-not-allowed':
@@ -111,7 +112,7 @@
 					</button>
 					<!-- </a> -->
 					<div
-						class="overflow-y-auto border mt-5"
+						class="overflow-y-auto border mt-5 max-md:hidden"
 						v-if="props.history.length != 0"
 					>
 						<table class="table table-zebra w-full z-[-1]">
@@ -145,7 +146,7 @@
 						</table>
 					</div>
 				</div>
-				<div class="w-4/12 px-10">
+				<div class="md:w-4/12 px-10 max-md:py-5">
 					<p class="pt-1 font-semibold text-xl">Judul Ujian</p>
 					<p>
 						{{ props.exam.exam }}
@@ -168,11 +169,7 @@
 					<div class="border-b-2 pb-3 mb-3 border-red-400"></div>
 					<div>
 						<p class="pt-1 font-semibold">Tingkat Ujian</p>
-						<small
-							:class="{
-								'text-gray-400': props.exam.description == null,
-							}"
-						>
+						<small>
 							{{ props.exam.tier }}
 						</small>
 					</div>
@@ -238,6 +235,55 @@
 					><br />
 					<small>Untuk Instansi: Tidak</small>
 				</div>
+				<button
+						class="bg-red-600 text-white py-3 mt-4 px-2 rounded font-semibold hover:bg-gray-700 focus:outline-none tracking-widest active:bg-gray-900 focus:shadow-outline-gray transition ease-in-out duration-150 mb-1 w-full text-center md:hidden"
+
+						:class="[
+							{
+								'opacity-50 cursor-not-allowed':
+									!examReadyResult,
+							},
+						]"
+						as="button"
+						@click="sessionRedirect"
+						:disabled="!examReadyResult"
+					>
+						Kerjakan Ujian
+					</button>
+					<div
+						class="overflow-y-auto border mt-5 md:hidden"
+						v-if="props.history.length != 0"
+					>
+						<table class="table table-zebra w-full z-[-1]">
+							<tr
+								v-for="(history, index) in props.history"
+								:class="{ hidden: index >= 10 }"
+							>
+								<th>
+									<span	
+										class="px-3"
+	
+										:class="[
+											{ 'bg-yellow-300': index == 0 },
+											{ 'bg-zinc-300': index == 1 },
+											{ 'bg-amber-600': index == 2 },
+										]"
+										>{{ parseInt(index) + 1 }}</span	
+									>
+								</th>
+								<td>
+									<div
+										class="w-16 h-16 bg-cover rounded-full"
+										style="
+											background-image: url('/image/rasberry.jpg');
+										"
+									></div>
+								</td>
+								<td>{{ history.history.user.name }}</td>
+								<td>Point. {{ history.point }}</td>
+							</tr>
+						</table>
+					</div>
 			</div>
 		</div>
 	</div>
@@ -249,7 +295,6 @@
 		:input="key"
 		:title="'Masukkan Kunci'"
 	/>
-		@closeModal="closeModal"
 	<ModalRules :show="rules" @closeModal="closeModal" class="z-30" />
 	<Transition>
 		<Notification
@@ -281,7 +326,7 @@ const props = defineProps({
 	history: Object,
 	notification: String,
 });
-// console.log(props.problem);
+console.log(props.auth);
 const key = ref("");
 const keyModal = ref(false);
 const keyPending = ref(false);

@@ -1,6 +1,6 @@
 <template>
     <div>
-        <Navbar :name="props.authNow.name" :ziggy="props.ziggy" />
+        <Navbar :user="props.authNow" :ziggy="props.ziggy" />
         <div class="pt-10 md:mb-16 px-10 text-gray-700 md:flex md:flex-warp">
             <div
                 class="shadow px-5 py-5 bg-white md:flex md:flex-warp md:w-9/12 rounded"
@@ -8,7 +8,8 @@
                 <div
                     class="md:w-6/12 flex max-md:justify-center items-center px-5 max-md:py-5"
                 >
-                    <img src="/image/loli.png" class="rounded-full w-24 h-24" />
+                <div class="rounded-full w-24 h-24 bg-cover bg-center" :style="`background-image:url('${props.authNow.attachment.path}${props.authNow.attachment.filename}')`"></div>
+                    <!-- <img :src="`${props.authNow.attachment.path}${props.authNow.attachment.filename}`" class="rounded-full w-24 h-24" />      -->
                     <div class="ml-3 pl-3">
                         <p class="leading-8 text-sm">
                             {{ props.authNow.name }}
@@ -118,7 +119,6 @@ const props = defineProps({
     ziggy: Object,
     session: Object,
 });
-
 let form = useForm({
     exam: null,
 });

@@ -1,5 +1,5 @@
 <template>
-    <div class="min-h-screen flex flex-col sm:justify-center items-center pt-6 sm:pt-0 bg-gray-50" >
+    <div class="flex flex-col sm:justify-center items-center pt-6 sm:pt-0 bg-gray-50 md:w-96" >
         <div>
             <h1 class="text-4xl">{{ name.name }}</h1>
         </div>

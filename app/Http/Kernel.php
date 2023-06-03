@@ -56,6 +56,7 @@ class Kernel extends HttpKernel
      */
     protected $routeMiddleware = [
         'auth' => \App\Http\Middleware\Authenticate::class,
+        'myExam' => \App\Http\Middleware\MyExam::class,
         'sessionthere' => \App\Http\Middleware\SessionThere::class,
         'tokenismine' => \App\Http\Middleware\TokenIsMine::class,
         'examRemove' => \App\Http\Middleware\ExamRemove::class,

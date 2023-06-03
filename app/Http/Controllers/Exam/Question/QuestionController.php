@@ -10,6 +10,7 @@ use App\Models\Point;
 use App\Models\Choice_attachment;
 use App\Models\Choice;
 use App\Models\Question;
+use App\Models\AnswerKeys;
 use App\Models\Question_attachment;
 use App\Models\QuestionData;
 use Inertia\Inertia;
@@ -181,5 +182,108 @@ class QuestionController extends Controller
         // dd(Question::where('id', $request->post('idQuestion'))->first());
         return $this->returnGet($id);
     }
+    public function saveAll(Request $request, $id){
+        $question = $this->updateTextSaveAll($request->post('val')[1], $id);
+        $choice = $this->choiceSave($request->post('val')[0], $id);
+        // dump($choice);
+        return $this->returnGet($id);
+    }
+    public function choiceSave($request, $id){
+        // dd($request);
+        $choiceArr = collect([]);
+        foreach($request as $data){
+            $choiceArr->push($data['id']);
+        }
+        $choices = Choice::with(['keys' => function($val){
+            $val->where('remove',null);
+        }])->whereIn('id', $choiceArr)->where('remove', null)->get();
+        // dd($request[0]);
 
+        foreach($choices as $key=>$choice){
+            $new = Choice::create([
+                "choice" => $request[$key]['choice'],
+                "question_id" => $choice->question_id,
+                "choice_attachment" => $choice->choice_attachment,
+                "remove" => null,
+            ]);
+
+            Choice::find($choice->id)->update([
+                'remove'=>'remove'
+            ]);
+            if ($choice->keys != null) {
+                AnswerKeys::create([
+                    'choice_id'=>$new->id,
+                    'question_id'=>$new->question_id,
+                    'remove'=>null
+                ]);
+                AnswerKeys::find($choice->keys->id)->update([
+                    'remove'=>'remove'
+                ]);
+            }
+        }
+        return $request;
+    }
+    public function updateTextSaveAll($request, $id){
+        if (QuestionData::where('question_id', $request['idQuestion'])->get()->isNotEmpty()) {
+            $beforeQuestionData = QuestionData::where('question_id', $request['idQuestion'])->update([
+                'remove'=>"remove"
+            ]);
+        }
+        if ($request['data']['blocks'] == []) {
+            $questionData = new QuestionData;
+            $questionData->data = '';
+            $questionData->type = 'paragraph';
+            $questionData->question_id = $request['idQuestion'];
+            $questionData->save();
+        }else{
+            foreach($request['data']['blocks'] as $key=>$dataCount){
+                if ($dataCount['type'] == "image") {
+                    $image = Question_attachment::where('filename', explode("/", $request['data']['blocks'][$key]['data']['file']['url'])[2])->first();
+                // $questionAttachment = Question_attachment::where('filename', )
+                    $questionData = QuestionData::create([
+                        'data'=>null,
+                        'type'=>$request['data']['blocks'][$key]['type'],
+                        'question_id'=>$request['idQuestion'],
+                        'question_attachment'=>$image->id
+                    ]);
+                    $center = 'true';
+                    switch ($dataCount['data']['withBackground']) {
+                        case 'true':
+                        $center = 'true';
+                        break;
+                        case 1:
+                        $center = 'true';
+                        break;
+                        case true:
+                        $center = 'true';
+                        break;
+                        case 'false':
+                        $center = 'false';
+                        break;
+                        case false:
+                        $center = 'false';
+                        break;
+                        case 0:
+                        $center = 'false';
+                        break;
+
+                    }
+                    
+                    $center = Question_attachment::find($image->id)->update([
+                        'withBackground'=>$center
+                    ]);
+                // dd($a);
+
+                }else{
+                    $questionData = QuestionData::create([
+                        'data'=>$request['data']['blocks'][$key]['data']['text'],
+                        'type'=>$request['data']['blocks'][$key]['type'],
+                        'question_id'=>$request['idQuestion']
+                    ]);
+                    // dump($questionData);
+                } 
+            }
+        }
+// dump(json_decode($this->returnGet($id)));     
+    } 
 }

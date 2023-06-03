@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Models\Point;
+use App\Models\User_attachment;
 use App\Providers\RouteServiceProvider;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\Request;
@@ -53,6 +54,13 @@ class RegisteredUserController extends Controller
             'birth' => $curent,
             'point' => 0,
             'password' => Hash::make($request->password),
+        ]);
+        $attachment = User_attachment::create([
+            'filename' => 'rasberry.jpg',
+            'path' => '/image/',
+            'type' => '.jpg',
+            'user_id' => $user->id,
+            'size' => 10,
         ]);
 
         return redirect()->route('login')->with('message','Akun berhasil di buat');

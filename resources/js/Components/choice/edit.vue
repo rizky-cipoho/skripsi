@@ -1,8 +1,8 @@
 <template>
-	<div class="py-10 max-md:overflow-auto">
+	<div class="max-md:p-10 md:py-10 max-md:overflow-auto max-md:fixed max-md:left-0">
 		<div class="flex flex-wrap">
 			<div
-				class="mb-5 px-3 w-6/12"
+				class="mb-5 max-md:px-3 w-6/12"
 				v-for="(choice, index) in props.questions[props.selected]
 					.choice"
 				:key="index"
@@ -14,21 +14,22 @@
 						type="radio"
 						name="a"
 						class="radio radio-error"
-						:id="choice.id"
+						:title="choice.id"
 						v-on:change="key"
 						:checked="choice.keys != null"
 					/>
+					<!-- <pre>{{ choice }}</pre> -->
 					<textarea
 						type="text"
 						class="md:w-11/12 max-md:w-full textarea textarea-bordered"
 						placeholder="Masukkan nilai pilihan"
-						v-debounce:300.once="submitKeyup"
 						rows="3"
 						style="resize: none"
 						:id="choice.id"
 						:title="choice.question_id"
-						v-model.once="choice.choice"
-					/>
+						:value.once="choice.choice"
+					>{{ choice.choice }}</textarea>
+					<!-- v-debounce:300.once="submitKeyup" -->
 				</div>
 				<div class="flex">
 					<div class="md:px-5">
@@ -78,9 +79,9 @@ const props = defineProps({
 	selected: Number,
 	exam: Object,
 	choiceMobile: Boolean,
+	choiceTrigger:Number
 });
-console.log(props.questions);
-const emit = defineEmits(["pending", "questionsEmit", "pendingNoEffect"]);
+const emit = defineEmits(["pending", "questionsEmit", "pendingNoEffect", "choiceDataSave", "problemPush","save"]);
 // const choice = ref("")
 function submitKeyup(val, a) {
 		emit("pendingNoEffect");
@@ -122,7 +123,7 @@ function removeChoice(e) {
 }
 function addImage(e) {
 	emit("pending");
-
+	emit("save");
 	const url = URL.createObjectURL(e.target.files[0]);
 	let formData = new FormData();
 
@@ -146,10 +147,10 @@ function addImage(e) {
 }
 function key(e) {
 	emit("pendingNoEffect");
-
+	emit("save");
 	axios
 		.post(route("keyChoice", props.exam.id), {
-			id: e.target.id,
+			id: e.target.title,
 		})
 		.then((output) => {
 			emit("questionsEmit", output.data);
@@ -158,6 +159,7 @@ function key(e) {
 }
 function removeImage(e) {
 	emit("pending");
+	emit("save");
 	axios
 		.post(route("removeImage", props.exam.id), {
 			id: e.target.id,
@@ -167,5 +169,19 @@ function removeImage(e) {
 			emit("pending");
 		});
 }
+
+const saveChoice = toRef(props, "choiceTrigger")
+watch(saveChoice, ()=>{
+	// console.log(props.questions[props.selected]);
+		
+	const arr = [];
+	for(let i = 0; i < props.questions[props.selected].choice.length; i++){
+		let choice = document.getElementById(props.questions[props.selected].choice[i].id).value;
+		let choiceId = document.getElementById(props.questions[props.selected].choice[i].id).id;console.log(document.getElementById(props.questions[props.selected].choice[i].id).id)
+		let questionId = document.getElementById(props.questions[props.selected].choice[i].id).title;
+		arr.push({choice:choice, id:choiceId, question_id:questionId})
+	}
+	emit("choiceDataSave", arr)
+})
 </script>
 `

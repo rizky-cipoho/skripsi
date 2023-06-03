@@ -20,6 +20,8 @@ const emit = defineEmits([
 	"removeQuestionApplyData",
 	"questionsEmit",
 	"pendingNoEffect",
+	"questionDataSave",
+	"save",
 ]);
 function pending() {
 	emit("pendingSave");
@@ -36,9 +38,9 @@ const props = defineProps({
 	saveQuestionCount: Number,
 	removeQuestion: Number,
 	selectedTrigger: Number,
+	questionTrigger: Number,
 });
-// console.log(props.questions);
-// console.log('atas');
+
 const dataPropsQuestions = ref([...props.questions]);
 let data = ref([
 	{
@@ -50,40 +52,16 @@ let data = ref([
 const csrfToken = document
 	.querySelector('meta[name="csrf-token"]')
 	.getAttribute("content");
-// 	class MyImageTool extends ImageTool {
-//   renderSettings() {
-//     const div = document.createElement('div');
-//     div.style.marginTop = '-6px';
-//     return div;
-//   }
-// }
+
 const editor = new EditorJS({
 	holder: "editorjs",
 	tools: {
-		header: {
-			class: Header,
-			inlineToolbar: false,
-		},
 		paragraph: {
 			inlineToolbar: false,
-			tunes: ["anyTuneName"],
 		},
 		image: {
 			class: ImageTool,
 			config: {
-				// additionalRequestHeaders: {
-				// 	"X-CSRF-TOKEN": document
-				// 		.querySelector('meta[name="csrf-token"]')
-				// 		.getAttribute("content"),
-				// 	field: "PATCH",
-				// },
-				// endpoints: {
-				// 	byFile: route("addQuestionImage", [
-				// 		props.exam.id,
-				// 		dataPropsQuestions.value[props.selected].question_data[0]
-				// 			.question_id,
-				// 	]),
-				// },
 				uploader: {
 					uploadByFile(file) {
 						let formData = new FormData();
@@ -103,6 +81,7 @@ const editor = new EditorJS({
 								}
 							)
 							.then((output) => {
+								emit("save");
 								emit("questionsEmit", output.data.get);
 								data.value[0].question_id = "";
 								data.value[0].blocks = [];
@@ -110,7 +89,6 @@ const editor = new EditorJS({
 							})
 							.then((output) => {
 								dataSet();
-								console.log(output.data);
 								const imageData = {
 									success: 1,
 									file: {
@@ -124,59 +102,31 @@ const editor = new EditorJS({
 				},
 			},
 		},
-		checklist: {
-			class: Checklist,
-			inlineToolbar: true,
-		},
-		anyTuneName: {
-			class: AlignmentTuneTool,
-			config: {
-				default: "left",
-				blocks: {
-					header: "center",
-					list: "right",
-				},
-			},
-		},
 	},
 	// autofocus: true,
 	data: {
 		...data.value[props.selected],
 	},
 	placeholder: "Tulis Soal",
-	onChange: (api, event) => {
-		data.value[0].question_id = "";
-		data.value[0].blocks = [];
-		autoSave();
-	},
+	// onChange: (api, event) => {
+	// 	data.value[0].question_id = "";
+	// 	data.value[0].blocks = [];
+	// 	autoSave();
+	// },
 });
 const selected = toRef(props, "selected");
 const selectedDuplicate = ref(props.selected);
 const idQuestionDuplicate = ref(props.idQuestion);
 watch(selected, () => {
-	editor.isReady.then(() => {
-		pending();
-		editor
-			.save()
-			.then((outputData) => {
-				axios
-					.get(route("questionDataUpdate", props.exam.id), {
-						data: outputData,
-						count: selectedDuplicate.value,
-						idQuestion: idQuestionDuplicate.value,
-					})
-					.then((outputText) => {
-						emit("questionsEmit", outputText.data);
-						selectedDuplicate.value = props.selected;
-						idQuestionDuplicate.value = props.idQuestion;
-						pending();
-					});
-			})
-			.catch((error) => {
-				selectedDuplicate.value = props.selected;
-				idQuestionDuplicate.value = props.idQuestion;
-			});
-	});
+	pending();
+	axios
+		.get(route("questionDataUpdate", props.exam.id))
+		.then((outputText) => {
+			emit("questionsEmit", outputText.data);
+			selectedDuplicate.value = props.selected;
+			idQuestionDuplicate.value = props.idQuestion;
+			pending();
+		});
 	dataSet();
 });
 let questionsD = toRef(props, "questions");
@@ -184,14 +134,6 @@ watch(questionsD, () => {
 	dataPropsQuestions.value = [];
 	dataPropsQuestions.value.push(...props.questions);
 });
-// const saveQuestionCountToRef = toRef(props, "saveQuestionCount");
-// watch(saveQuestionCountToRef, () => {
-// 	editor.isReady.then(() => {
-// 		pending();
-// 		editor.save().then((outputData) => {
-//
-// 	});
-// });
 
 function autoSave() {
 	pendingNoEffect();
@@ -204,6 +146,7 @@ function autoSave() {
 				})
 				.then((output) => {
 					emit("questionsEmit", output.data);
+					// console.log(output.data)
 					pendingNoEffect();
 				})
 				.catch((error) => {
@@ -225,7 +168,6 @@ watch(removeQuestionCountToRef, () => {
 				.then((output) => {
 					emit("removeQuestionApplyData");
 					emit("questionsEmit", output.data);
-					// console.log(output.data);
 					return output;
 				})
 				.then((output) => {
@@ -323,6 +265,18 @@ function dataSet() {
 	});
 }
 dataSet();
+
+const saveTrigger = toRef(props, "questionTrigger");
+watch(saveTrigger, () => {
+	editor.isReady.then(() => {
+		editor.save().then((outputData) => {
+			emit("questionDataSave", {
+				data: outputData,
+				idQuestion: dataPropsQuestions.value[props.selected].id,
+			});
+		});
+	});
+});
 </script>
 <style>
 .ce-popover__item[data-item-name="withBorder"],

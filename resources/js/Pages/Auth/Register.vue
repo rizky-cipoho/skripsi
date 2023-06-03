@@ -1,5 +1,6 @@
 <template>
-    <GuestLayout :name="title">
+    <div class="flex justify-center items-center w-full h-screen bg-gray-50">
+        <GuestLayout :name="title">
         <Head title="Register" />
 
         <form @submit.prevent="submit">
@@ -126,6 +127,7 @@
         </form>
         <Notification :text="props.alert" :show="props.alert" />
     </GuestLayout>
+    </div>
 </template>
 <script setup>
 import GuestLayout from "@/Layouts/GuestLayout.vue";

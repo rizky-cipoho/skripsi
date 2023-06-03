@@ -35,7 +35,11 @@ class ExamPageController extends Controller
                 $questionData->where('remove', null);
             });
             $question->with('choice', function($choice){
-                $choice->with('keys');
+                $choice->with([
+                    'keys'=>function($keys){
+                        $keys->where('remove', null);
+                    }
+                ]);
                 $choice->with('attachment');
                 $choice->where('remove', null);
             });
@@ -91,7 +95,7 @@ class ExamPageController extends Controller
         ]);
         $attachment = Exam_Attachment::create([
             'exam_id' => $add->id,
-            'filename'=>"rasberry",
+            'filename'=>"rasberry.jpg",
             'path'=>"/image/",
             'size'=>"4000",
             'type'=>".jpg",
@@ -135,7 +139,11 @@ class ExamPageController extends Controller
                             'choice'=>function($choice){
                                 $choice->with([
                                     'choice'=>function($choiceOriginal){
-                                        $choiceOriginal->with('keys');
+                                        $choiceOriginal->with([
+                                            'keys'=>function($keys){
+                                                $keys->where('remove', null);
+                                            }
+                                        ]);
                                         $choiceOriginal->with('attachment');
                                     }
                                 ]);
@@ -185,7 +193,7 @@ class ExamPageController extends Controller
         $update = Exam::find($id)->update([
             'exam'=>$request->examName
         ]);
-        $now = Exam::find($id);
+        $now = $this->examReturn($id);
         return $now;
     }
     public function changeExamLesson(ExamRequest $request, $id){

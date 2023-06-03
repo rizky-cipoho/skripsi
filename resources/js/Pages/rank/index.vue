@@ -1,12 +1,12 @@
 <template>
-	<Navbar :name="props.auth.user.name" :ziggy="props.ziggy" />
-	<div class="flex justify-between px-20 py-10">
-		<div class="flex justify-center w-10/12">
+	<Navbar :user="props.auth.user" :ziggy="props.ziggy" />
+	<div class="flex justify-between py-10">
+		<div class="flex justify-center max-md:full md:w-10/12">
 			<div>
 				<Rank :data="data" />
 			</div>
 		</div>
-		<div class="flex justify-left py-10 w-2/12">
+		<div class="flex justify-left py-10 w-2/12 max-md:hidden">
 			<div class="overflow-y-auto">
 				<div
 					class="py-2 flex items-center select-none cursor-pointer hover:text-red-600"

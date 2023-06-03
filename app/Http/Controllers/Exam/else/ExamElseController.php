@@ -73,7 +73,6 @@ class ExamElseController extends Controller
         $auth = User::find(Auth::user()->id);
         return Inertia::render('exam/examElse/index',[
             'exam'=>$exam,
-            'auth'=>$auth,
             'history'=>$sessionResult,
             'problem'=>$this->examNotReady($id)
         ]);
@@ -517,6 +516,11 @@ class ExamElseController extends Controller
                             'choice'=>function($choice){
                                 $choice->where('remove',null);
                                 $choice->with('attachment');
+                                $choice->with([
+                                    'keys'=>function($keys){
+                                        $keys->where('remove',null);
+                                    }
+                                ]);
                             }
                         ]);
                     }

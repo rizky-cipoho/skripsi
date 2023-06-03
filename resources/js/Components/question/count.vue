@@ -1,31 +1,47 @@
 <template>
 	<div class="md:w-3/12 pl-10 py-3 rounded" style="">
-		<Problem :problem="props.problem" />
+		<Problem :problem="props.problem" :count="'count'" />
 		<div class="flex items-center">
 			<p>pilihan</p>
 			<div v-for="i in 5" class="p-2">
-				<button class="px-2 py-1 border border-gray-400 rounded hover:bg-gray-700 hover:text-white font-semibold" :class="{ 'bg-red-600 text-white border-none': props.exam.choice == i+1 }" :disabled="props.exam.choice == i+1" @click="triggerModal(i+1)" v-text="i+1">
-				</button>
+				<button
+					class="px-2 py-1 border border-gray-400 rounded hover:bg-gray-700 hover:text-white font-semibold"
+					:class="{
+						'bg-red-600 text-white border-none':
+							props.exam.choice == i + 1,
+					}"
+					:disabled="props.exam.choice == i + 1"
+					@click="triggerModal(i + 1)"
+					v-text="i + 1"
+				></button>
 			</div>
 		</div>
 		<div class="flex grid grid-cols-2 gap-2">
 			<button
-				class="btn w-full bg-red-600 border-none mb-5"
+				class="btn w-full bg-red-600 border-none mb-2"
 				@click="addQuestion"
 			>
 				Tambah Soal
 			</button>
 			<button
-				class="btn w-full bg-gray-700 border-none hover:bg-red-600"
+				class="btn w-full bg-red-600 border-none hover:bg-gray-700"
 				@click="removeQuestion"
 				:disabled="remove"
 			>
 				Hapus Soal
 			</button>
 		</div>
-
+		<div>
+			<button
+				class="btn w-full bg-red-600 border-none hover:bg-gray-700 mb-3"
+				@click="save"
+				:disabled="savePending"
+			>
+				Save
+			</button>
+		</div>
 		<div
-			class="overflow-auto overflow-x-hidden max-md:max-h-[26rem] px-3"
+			class="overflow-auto overflow-x-hidden max-md:max-h-[11rem] px-3"
 			:class="[
 				{ 'md:max-h-[7rem]': 0 < props.problem.length },
 				{ 'md:max-h-[18rem]': 0 == props.problem.length },
@@ -45,7 +61,13 @@
 				</button>
 			</div>
 		</div>
-		<Modal :show="modal" :choice="choice" @accept="lengthChoice" @decline="decline" style="z-index: 99999;"/>
+		<Modal
+			:show="modal"
+			:choice="choice"
+			@accept="lengthChoice"
+			@decline="decline"
+			style="z-index: 99999"
+		/>
 	</div>
 </template>
 <script type="text/javascript" setup>
@@ -57,52 +79,62 @@ const props = defineProps({
 	problem: Object,
 	selected: Number,
 	exam: Object,
+	savePending: Boolean
 });
-console.log(props.questions.length);
-const modal = ref(false)
-let choice = ref(props.exam.choice)
-function triggerModal(val){
-	choice.value = val
-	modal.value = true
+const modal = ref(false);
+let choice = ref(props.exam.choice);
+function triggerModal(val) {
+	choice.value = val;
+	modal.value = true;
 }
 const emit = defineEmits([
 	"addQuestion",
 	"removeQuestion",
 	"selected",
 	"questionPush",
-	"examPush"
+	"examPush",
+	"save",
 ]);
 let remove = ref(false);
 
 const questionsToRef = toRef(props, "questions");
-watch(questionsToRef, () => {
-	if (questionsToRef.value.length == 1) {
-		remove.value = true;
-	} else {
-		remove.value = false;
-	}
-}, { immediate: true });
+watch(
+	questionsToRef,
+	() => {
+		if (questionsToRef.value.length == 1) {
+			remove.value = true;
+		} else {
+			remove.value = false;
+		}
+	},
+	{ immediate: true }
+);
 
-
-const addQuestion = () => emit("addQuestion");
-const removeQuestion = () => emit("removeQuestion");
+const addQuestion = () => {
+	emit("save")
+	emit("addQuestion")
+};
+const removeQuestion = () => {
+	emit("removeQuestion")
+};
 const questionPush = () => emit("questionPush");
 const selectedQuestion = (index, id) => emit("selected", { index, id });
-function lengthChoice(val){
-	axios.post(route("choiceLength", props.exam.id),{
-		length: val,
-		questions: props.questions[props.selected].id
-	})
-	.then((output)=>{
-		emit('questionPush', output.data)
-		emit('examPush', output.data.exam)
-		console.log(output.data);
-	})
-	modal.value = false
-
+function lengthChoice(val) {
+	axios
+		.post(route("choiceLength", props.exam.id), {
+			length: val,
+			questions: props.questions[props.selected].id,
+		})
+		.then((output) => {
+			emit("questionPush", output.data);
+			emit("examPush", output.data.exam);
+		});
+	modal.value = false;
 }
-function decline (){
-	modal.value = false
-	console.log("asdasd");
+function decline() {
+	modal.value = false;
+}
+function save(){
+	emit("save");
 }
 </script>

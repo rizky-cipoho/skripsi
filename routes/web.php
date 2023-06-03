@@ -19,6 +19,7 @@ use App\Http\Controllers\Cheat\CheatController;
 use App\Http\Middleware\SessionThere;
 use App\Http\Middleware\TokenIsMine;
 use App\Http\Middleware\ExamRemove;
+use App\Http\Middleware\myExam;
 
 /*
 |--------------------------------------------------------------------------
@@ -46,7 +47,7 @@ Route::group(['middleware'=>['auth'], 'prefix'=>'/dashboard'], function(){
     Route::post('/setting/school', [UserController::class, 'settingSchool'])->name('settingSchool')->middleware(SessionThere::class);
     Route::post('/setting/image', [UserController::class, 'settingImage'])->name('settingImage')->middleware(SessionThere::class);
     Route::get('/search', [DashboardController::class, 'search'])->name('search');
-    Route::group(['prefix'=>'/my/exam', 'middleware'=>['examRemove','sessionthere']], function(){
+    Route::group(['prefix'=>'/my/exam', 'middleware'=>['examRemove','sessionthere', 'myExam']], function(){
         Route::get('/', [ExamPageController::class, 'myExam'])->name('myExam');
         Route::get('/add', [ExamPageController::class, 'add'])->name('examAdd');
         Route::get('/{id}', [ExamPageController::class, 'selected'])->name('examSelected');
@@ -79,6 +80,7 @@ Route::group(['middleware'=>['auth'], 'prefix'=>'/dashboard'], function(){
             Route::post('/choice/key', [ChoiceController::class, 'keyChoice'])->name('keyChoice');
             Route::post('/choice/removeImage', [ChoiceController::class, 'removeImage'])->name('removeImage');
             Route::post('/choice/length', [ChoiceController::class, 'choiceLength'])->name('choiceLength');
+            Route::post('/saveAll', [QuestionController::class, 'saveAll'])->name('saveAll');
         });
     });
     

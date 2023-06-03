@@ -1,6 +1,6 @@
 <template>
     <div>
-        <Navbar :name="props.auth.user.name" :ziggy="props.ziggy" />
+        <Navbar :user="props.auth.user" :ziggy="props.ziggy" />
     </div>
     <div class="mx-16 mb-20">
         <br />
@@ -14,7 +14,7 @@
         <br />
         <p class="text-xl">Ujian Saya</p>
         <br />
-        <div class="flex grid md:grid-cols-4 max-md:grid-cols-2 md:gap-10 max-md:gap-5 mb-20">
+        <div class="flex grid md:grid-cols-4 max-md:grid-cols-1 md:gap-10 max-md:gap-5 mb-20">
             
             <MyExam v-for="(exam, index) in exams" :exam="exam" />
             
@@ -48,6 +48,7 @@ const props = defineProps({
     ziggy: Object,
     auth: Object
 });
+console.log(props.exams);
 const isOpen = ref(false);
 const pending = ref(false);
 const messageActive = ref(false);

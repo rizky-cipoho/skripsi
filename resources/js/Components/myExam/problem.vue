@@ -10,7 +10,7 @@
 		</p>
 	<div
 		class="rounded overflow-auto"
-		:class="{ 'max-h-[9rem] mb-1': 0 < props.problem.length }"
+		:class="[{ 'max-h-[9rem] mb-1': 0 < props.problem.length },{ 'md:max-h-[5rem] max-md:max-h-[9rem] mb-1': props.count == 'count' }]"
 	>
 		
 		<div class="text-left">
@@ -25,8 +25,8 @@
 </template>
 <script type="text/javascript" setup>
 	const props = defineProps({
-		problem: Object
+		problem: Object,
+		count: Object
 	})
-// console.log(props.problem)
 
 </script>

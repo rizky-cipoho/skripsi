@@ -1,5 +1,5 @@
 <template>
-	<Navbar :name="props.auth.user.name" :ziggy="props.ziggy" />
+	<Navbar :user="props.auth.user" :ziggy="props.ziggy" />
 	<div class="px-20 py-5">
 		<Link
 			:href="route('examSelected', link)"

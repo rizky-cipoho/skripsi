@@ -1,12 +1,12 @@
 <template>
-	<Navbar :name="props.auth.user.name" :ziggy="props.ziggy" />
+	<Navbar :user="props.auth.user" :ziggy="props.ziggy" />
 	<div class="flex justify-center p-20">
-		<div class="flex justify-center w-8/12">
-			<div class="flex bg-gray-100 border p-5 rounded w-full">
+		<div class="flex justify-center md:w-8/12 max-md:w-11/12">
+			<div class="md:flex bg-gray-100 border p-5 rounded w-full">
 				<div>
 					<div
 						:style="`background-image: url('${image}')`"
-						class="w-36 h-36 bg-cover bg-center rounded"
+						class="w-36 h-36 bg-cover bg-center rounded max-md:m-auto"
 					></div>
 					<button
 						class="shadow justify-center bg-red-600 hover:bg-gray-700 text-white mt-2 rounded font-semibold focus:outline-none tracking-widest active:bg-red-600 focus:shadow-outline-gray transition ease-in-out duration-250 inline-flex block mb-1 w-full mt-4 cursor-pointer"
@@ -22,8 +22,8 @@
 					</button>
 				</div>
 				<div class="pl-5 w-full">
-					<div class="flex items-center">
-						<strong class="text-xl">{{ name }}</strong>
+					<div class="flex items-center max-md:py-2">
+						<strong class="md:text-xl max-md:text-lg">{{ name }}</strong>
 						<div>
 							<CreateOutline
 								class="w-4 h-4 ml-5 cursor-pointer text-red-600 hover:text-gray-700 active:scale-75"
@@ -31,10 +31,12 @@
 							/>
 						</div>
 					</div>
-					<div class="py-4 flex grid grid-cols-2 w-full">
+					<div class="py-4 md:flex md:grid md:grid-cols-2 w-full">
 						<div class="mr-6">
 							<div class="flex items-center">
-								<SchoolOutline class="w-5 h-5 text-red-600" />
+								<div>
+									<SchoolOutline class="w-5 h-5 text-red-600" />
+								</div>
 								<p
 									class="px-2"
 									:class="{

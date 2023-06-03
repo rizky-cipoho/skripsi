@@ -22,7 +22,7 @@ class DashboardController extends Controller
         return History::where('user_id', Auth::user()->id)->get()->count();
     }
     public function authNow(){
-        return User::find(Auth::user()->id);
+        return User::with('attachment')->find(Auth::user()->id);
     }
     
     public function calculation($id){
@@ -158,7 +158,7 @@ class DashboardController extends Controller
                             'choice'=>function($choice){
                                 $choice->with([
                                     'choice'=>function($choiceOriginal){
-                                        $choiceOriginal->with('keys');
+                                        $choiceOriginal->with("keys");
                                         $choiceOriginal->with('attachment');
                                     }
                                 ]);
