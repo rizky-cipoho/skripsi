@@ -146,7 +146,6 @@ function autoSave() {
 				})
 				.then((output) => {
 					emit("questionsEmit", output.data);
-					// console.log(output.data)
 					pendingNoEffect();
 				})
 				.catch((error) => {

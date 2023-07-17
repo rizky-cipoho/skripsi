@@ -15,12 +15,14 @@ use App\Models\TimeStart;
 use App\Models\Session;
 use App\Models\Question;
 use App\Models\QuestionData;
-use App\Models\Exam_Attachment;
+use App\Models\Exam_attachment;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Requests\ExamRequest;
 use App\Traits\ImageTrait;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Http\Request;
+use Maatwebsite\Excel\Facades\Excel;
+use App\Exports\SessionExport;
 
 class ExamPageController extends Controller
 {
@@ -93,7 +95,7 @@ class ExamPageController extends Controller
             'tier'=>'SMA',
             'user_id'=>Auth::user()->id,
         ]);
-        $attachment = Exam_Attachment::create([
+        $attachment = Exam_attachment::create([
             'exam_id' => $add->id,
             'filename'=>"rasberry.jpg",
             'path'=>"/image/",
@@ -351,7 +353,8 @@ class ExamPageController extends Controller
         ->where('exam_id',$id)->get();
         // dd($session);
         return Inertia::render('exam/examHistory', [
-            'session'=>$session
+            'session'=>$session,
+            'exam'=>Exam::find($id),
         ]);
     }
     public function tier(Request $request, $id){
@@ -380,14 +383,14 @@ class ExamPageController extends Controller
         $exam = Exam::with('attachment')->find($id);
 
         if ($exam->attachment != null) {
-            $attachment = Exam_Attachment::find($exam->attachment->id)->update([
+            $attachment = Exam_attachment::find($exam->attachment->id)->update([
                 'filename'=>$upload->basename,
                 'path'=>'/images/',
                 'type'=>$upload->extension,
                 'size'=>$size,
             ]);
         }else{
-            $attachment = Exam_Attachment::create([
+            $attachment = Exam_attachment::create([
                 'filename'=>$upload->basename,
                 'path'=>'/images/',
                 'type'=>$upload->extension,
@@ -425,5 +428,9 @@ class ExamPageController extends Controller
             'exam'=>$this->examReturn($id),
             'problem'=>$this->examNotReady($id)
         ];
+    }
+    public function excel($id){
+        // dd("asdsad");
+        return Excel::download(new SessionExport($id), 'Nilai.xlsx');
     }
 }

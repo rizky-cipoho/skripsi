@@ -16,7 +16,7 @@
         <br />
         <div class="flex grid md:grid-cols-4 max-md:grid-cols-1 md:gap-10 max-md:gap-5 mb-20">
             
-            <MyExam v-for="(exam, index) in exams" :exam="exam" />
+            <MyExam v-for="(exam, index) in exams" :exam="exam" data-theme="light" />
             
         </div>
         <div class="text-center w-full select-none" v-if="exams.length == 0">
@@ -48,7 +48,6 @@ const props = defineProps({
     ziggy: Object,
     auth: Object
 });
-console.log(props.exams);
 const isOpen = ref(false);
 const pending = ref(false);
 const messageActive = ref(false);

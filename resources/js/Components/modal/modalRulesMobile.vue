@@ -44,11 +44,8 @@
                                         <img src="/image/screen2.png" class="w-4/12 rounded border border-gray-200">
                                     </div>
                                     <br>
-                                    <div class="md:hidden">
-                                        Diharap agar hati-hati dalam pengerjaan.
-                                    </div>
-                                    <div class="max-md:hidden">
-                                        Untuk lebih aman dalam mengerjaka ujian di harap peserta dapat menekan tombol <span class="bg-gray-200 px-1 rounded">F11</span> untuk menjalankan fullscreen, agar terhindar dari kesalahan yang tidak terduga dalam propses pegerjaan.
+                                    <div>
+                                        diharap agar hati hati dalam mengerjakan
                                     </div>
                                     <div class="flex justify-end">
                                         <button

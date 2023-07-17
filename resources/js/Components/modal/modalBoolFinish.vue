@@ -75,7 +75,6 @@ const props = defineProps({
     overForce: Boolean,
     data: Object
 });
-// console.log(props.overForce);
 const emit = defineEmits(["accept", "decline"]);
 function accept() {
     emit("accept");

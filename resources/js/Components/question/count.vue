@@ -13,6 +13,7 @@
 					:disabled="props.exam.choice == i + 1"
 					@click="triggerModal(i + 1)"
 					v-text="i + 1"
+					data-theme="light"
 				></button>
 			</div>
 		</div>
@@ -20,6 +21,7 @@
 			<button
 				class="btn w-full bg-red-600 border-none mb-2"
 				@click="addQuestion"
+				data-theme="light"
 			>
 				Tambah Soal
 			</button>
@@ -27,6 +29,7 @@
 				class="btn w-full bg-red-600 border-none hover:bg-gray-700"
 				@click="removeQuestion"
 				:disabled="remove"
+				data-theme="light"
 			>
 				Hapus Soal
 			</button>
@@ -36,6 +39,7 @@
 				class="btn w-full bg-red-600 border-none hover:bg-gray-700 mb-3"
 				@click="save"
 				:disabled="savePending"
+				data-theme="light"
 			>
 				Save
 			</button>
@@ -56,6 +60,7 @@
 						props.selected == index ? 'bg-red-600 text-white' : ''
 					"
 					@click="selectedQuestion(index, data.id)"
+					data-theme="light"
 				>
 					{{ index + 1 }}
 				</button>

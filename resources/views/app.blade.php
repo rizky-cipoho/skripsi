@@ -15,20 +15,9 @@
         @routes
         @vite(['resources/js/app.js', "resources/js/Pages/{$page['component']}.vue"])
         @inertiaHead
-                        <meta name="theme-color" content="#6777ef"/>
-<link rel="apple-touch-icon" href="{{ asset('/image/rasberry.jpg') }}">
-<link rel="manifest" href="{{ asset('/manifest.json') }}">
     </head>
-    <body class="font-sans antialiased">
+    <body class="font-sans antialiased bg-white text-black min-h-screen" data-theme="light">
         @inertia
-                <script src="{{ asset('/sw.js') }}"></script>
-<script>
-    if (!navigator.serviceWorker.controller) {
-        navigator.serviceWorker.register("/sw.js").then(function (reg) {
-            console.log("Service worker has been registered for scope: " + reg.scope);
-        });
-    }
-</script>
 
     </body>
 </html>

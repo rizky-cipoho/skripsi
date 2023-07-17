@@ -1,7 +1,7 @@
 <template>
 	<div>
 		<Navbar :user="props.auth.user" :ziggy="props.ziggy" />
-		<div class="flex justify-center px-40 py-5">
+		<div class="flex justify-center md:px-40 max-md:px-10 pt-5">
 			<div class="alert alert-warning shadow-lg" v-if="props.alert">
 				<div>
 					<svg
@@ -21,7 +21,10 @@
 				</div>
 			</div>
 		</div>
-		<div class="flex justify-center md:px-40 max-md:px-10 py-5">
+		<div
+			class="flex justify-center md:px-40 max-md:px-10 py-5"
+			data-theme="light"
+		>
 			<div class="alert">
 				<div>
 					<svg
@@ -101,7 +104,9 @@
 					</div>
 				</div>
 				<div class="flex justify-center">
-					<div class="md:flex items-center justify-center text-center px-5 py-5">
+					<div
+						class="md:flex items-center justify-center text-center px-5 py-5"
+					>
 						<div class="flex justify-center">
 							<NavigateCircleSharp class="w-7 mx-1 text-green-600" />
 						</div>
@@ -109,20 +114,20 @@
 					</div>
 					<div class="md:flex text-center items-center px-5 py-5">
 						<div class="flex justify-center">
-						<CheckmarkCircle class="w-7 mx-1 text-green-600" />
-					</div>
+							<CheckmarkCircle class="w-7 mx-1 text-green-600" />
+						</div>
 						Kunci jawaban
 					</div>
 					<div class="md:flex text-center items-center px-5 py-5">
 						<div class="flex justify-center">
-						<NavigateCircleSharp class="w-7 mx-1 text-red-600" />
-					</div>
+							<NavigateCircleSharp class="w-7 mx-1 text-red-600" />
+						</div>
 						Yang di pilih salah
 					</div>
 					<div class="md:flex text-center items-center px-5 py-5">
 						<div class="flex justify-center">
-						<CloseCircle class="w-7 mx-1 text-red-600" />
-					</div>
+							<CloseCircle class="w-7 mx-1 text-red-600" />
+						</div>
 						Salah
 					</div>
 				</div>
@@ -154,7 +159,7 @@
 						</div>
 
 						<div>
-							<div class="flex grid grid-cols-2">
+							<div class="flex items-center grid grid-cols-2">
 								<div class="my-5" v-for="(choice, index) in data.choice">
 									<div
 										v-if="choice.choice.choice_attachment == null"
@@ -189,20 +194,27 @@
 											{{ choice.choice.choice }}
 										</div>
 									</div>
-									<div v-else class="flex items-center px-5">
+									<div
+										v-else
+										class="flex items-center px-5"
+										:class="[
+											{
+												'text-green-600': choice.choice.keys != null,
+											},
+											{
+												'text-red-600': choice.choice.keys == null,
+											},
+										]"
+									>
 										<div v-if="data.answer != null">
 											<div v-if="data.answer.choice_id == choice.id">
-												<NavigateCircleSharp
-													class="w-7"
-													:class="[
-														{
-															'text-green-600': choice.choice.keys != null,
-														},
-														{
-															'text-red-600': choice.choice.keys == null,
-														},
-													]"
-												/>
+												<NavigateCircleSharp class="w-7" />
+											</div>
+											<div v-else-if="choice.choice.keys != null">
+												<CheckmarkCircle class="w-7 text-green-600" />
+											</div>
+											<div v-else>
+												<CloseCircle class="w-7" />
 											</div>
 										</div>
 										<div v-else-if="choice.choice.keys != null">
@@ -211,19 +223,17 @@
 										<div v-else>
 											<CloseCircle class="w-7 text-gray-900" />
 										</div>
-										<img
-											:src="
-												choice.choice.attachment.path +
-												choice.choice.attachment.filename
-											"
-										/>
+										<!-- <pre>{{ choice.choice }}</pre> -->
+										<div class="px-3">
+											<img
+												:src="
+													choice.choice.attachment.path +
+													choice.choice.attachment.filename
+												"
+											/>
+										</div>
 									</div>
 								</div>
-
-								<!-- 								<div class="flex items-center my-5">
-									<CheckmarkCircle class="w-7 text-red-600" />
-									<div class="pl-3">sadsa</div>
-								</div> -->
 							</div>
 						</div>
 					</div>
@@ -249,7 +259,6 @@ const props = defineProps({
 	sessionAll: Object,
 	alert: String,
 });
-console.log(props.sessionAll);
 const questionTrue = ref([]);
 const question = ref([...props.histories.history.question]);
 

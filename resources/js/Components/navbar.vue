@@ -186,7 +186,6 @@ const props = defineProps({
   ziggy: Object,
   examSelected: String,
 });
-// console.log(props.user);
 const location = ref("");
 const active = ref(false);
 const locationNow = () => {

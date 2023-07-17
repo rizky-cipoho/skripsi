@@ -72,18 +72,34 @@ trait ExamTrait
         }
         if($this->favorite() != "Semuanya"){
             $lesson = Lesson::where('lesson', $this->favorite())->first();
-            $result = Exam::whereNotIn('id', $collecttion)->where('lesson_id', $lesson->id)->where('remove', null)->with('attachment')->orderBy('id','DESC')->whereIn('tier',$ages)->with('user')->get();
+            $result = Exam::whereNotIn('id', $collecttion)
+            ->where('lesson_id', $lesson->id)
+            ->where('remove', null)
+            ->with('attachment')
+            ->orderBy('id','DESC')
+            ->whereIn('tier',$ages)
+            ->with('user')->get();
         }else{
-            $result = Exam::whereNotIn('id', $collecttion)->with('attachment')->orderBy('id','DESC')->where('remove', null)->whereIn('tier',$ages)->with('user')->get();
+            $result = Exam::whereNotIn('id', $collecttion)
+            ->with('attachment')
+            ->orderBy('id','DESC')
+            ->where('remove', null)
+            ->whereIn('tier',$ages)
+            ->with('user')->get();
         }
         $data = collect([]);
         $length = 0;
-        foreach($result as $index){
-            $data->push($index);
-            if($length>4){
-                break;
+
+        if (!$result->isEmpty()) {
+            foreach($result as $index){
+                if ($this->examNotReady($index->id)->isEmpty()) {
+                    $data->push($index);
+                    if(7<$length){
+                        break;
+                    }
+                    $length++;
+                }
             }
-            $length++;
         }
         return $data;
     }
@@ -183,7 +199,6 @@ trait ExamTrait
                 $problem->push('Setiap soal harus memiliki satu jawaban yang benar'.' No.'.$key+1);
             }
         }
-// dd($problem);
         return $problem;
     }
 }

@@ -40,6 +40,7 @@
                         v-model="form.date"
                         required
                         autocomplete="date"
+                        data-theme="light"
                     >
                         <option v-for="i in 31">{{i}}</option>
                     </select>
@@ -54,6 +55,7 @@
                         v-model="form.month"
                         required
                         autocomplete="month"
+                        data-theme="light"
                     >
                         <option v-for="i in 12">{{i}}</option>
                     </select>
@@ -68,6 +70,7 @@
                         v-model="form.year"
                         required
                         autocomplete="year"
+                        data-theme="light"
                     >
                         <option v-for="i in year">{{i}}</option>
                     </select>

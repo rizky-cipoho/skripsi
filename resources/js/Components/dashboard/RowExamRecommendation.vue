@@ -1,12 +1,12 @@
 <template>
-	<div class="px-10">
+	<div class="px-10 rounded">
 		<div class="">
-			<h1 class="text-2xl">Rekomendasi Ujian {{ props.favorite }}</h1>
+			<h1 class="text-2xl">Rekomendasi Ujian {{ props.favorite == "Semuanya" ? "" : props.favorite }} Untuk Tingkat {{ props.tier }}</h1>
 			<hr
 				class="w-20 bg-red-600"
 				style="height: 2px; border-width: 0; color: red"
 			/>
-			<div class="flex grid gap-3 md:grid-cols-6 max-md:grid-cols-2 my-4">
+			<div class="flex grid gap-3 md:grid-cols-6 max-md:grid-cols-2 my-4" v-if="props.recommendationsData.length != 0">
 				<Link
 					v-for="(recomendation, index) in props.recommendationsData"
 					:href="route('examInfo', recomendation.id)"
@@ -20,6 +20,9 @@
 					/>
 				</Link>
 			</div>
+			<div class="flex justify-center items-center h-20" v-else>
+				<p class="py-10 text-gray-400 text-2xl">Rekomendasi Ujian Kosong</p>
+			</div>
 		</div>
 	</div>
 </template>
@@ -31,6 +34,6 @@ import cardRecomendation from "@/Components/dashboard/cardRecomendation.vue";
 const props = defineProps({
 	recommendationsData: Object,
 	favorite: String,
+	tier: String,
 });
-// console.log(props.recommendationsData);
 </script>

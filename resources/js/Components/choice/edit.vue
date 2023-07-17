@@ -1,5 +1,5 @@
 <template>
-	<div class="max-md:p-10 md:py-10 max-md:overflow-auto max-md:fixed max-md:left-0">
+	<div class="max-md:p-10 md:py-10 max-md:overflow-auto max-md:fixed max-md:left-0" >
 		<div class="flex flex-wrap">
 			<div
 				class="mb-5 max-md:px-3 w-6/12"
@@ -17,6 +17,7 @@
 						:title="choice.id"
 						v-on:change="key"
 						:checked="choice.keys != null"
+						data-theme="light"
 					/>
 					<!-- <pre>{{ choice }}</pre> -->
 					<textarea
@@ -26,6 +27,7 @@
 						rows="3"
 						style="resize: none"
 						:id="choice.id"
+						data-theme="light"
 						:title="choice.question_id"
 						:value.once="choice.choice"
 					>{{ choice.choice }}</textarea>
@@ -39,6 +41,7 @@
 							class="file-input file-input-ghost w-full max-w-xs"
 							@change="addImage"
 							:id="choice.id"
+							data-theme="light"
 						/>
 					</div>
 					<div class="px-1">
@@ -47,6 +50,7 @@
 							class="md:btn max-md:text-white max-md:rounded max-md:hover:bg-gray-700 max-md:px-1 bg-red-600 border-none max-md:transition max-md:duration-150 max-md:active:scale-75"
 							:id="choice.id"
 							@click="removeImage"
+							data-theme="light"
 						>
 							Hapus Gambar
 						</button>
@@ -171,13 +175,11 @@ function removeImage(e) {
 }
 
 const saveChoice = toRef(props, "choiceTrigger")
-watch(saveChoice, ()=>{
-	// console.log(props.questions[props.selected]);
-		
+watch(saveChoice, ()=>{		
 	const arr = [];
 	for(let i = 0; i < props.questions[props.selected].choice.length; i++){
 		let choice = document.getElementById(props.questions[props.selected].choice[i].id).value;
-		let choiceId = document.getElementById(props.questions[props.selected].choice[i].id).id;console.log(document.getElementById(props.questions[props.selected].choice[i].id).id)
+		let choiceId = document.getElementById(props.questions[props.selected].choice[i].id).id;
 		let questionId = document.getElementById(props.questions[props.selected].choice[i].id).title;
 		arr.push({choice:choice, id:choiceId, question_id:questionId})
 	}

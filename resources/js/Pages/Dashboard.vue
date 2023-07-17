@@ -1,21 +1,24 @@
 <template>
-    <div>
+    <div class="bg-white text-black">
         <Navbar :user="props.authNow" :ziggy="props.ziggy" />
-        <div class="pt-10 md:mb-16 px-10 text-gray-700 md:flex md:flex-warp">
+        <div class="pt-10 px-10 text-gray-700 md:flex md:flex-warp">
             <div
                 class="shadow px-5 py-5 bg-white md:flex md:flex-warp md:w-9/12 rounded"
             >
                 <div
                     class="md:w-6/12 flex max-md:justify-center items-center px-5 max-md:py-5"
                 >
-                <div class="rounded-full w-24 h-24 bg-cover bg-center" :style="`background-image:url('${props.authNow.attachment.path}${props.authNow.attachment.filename}')`"></div>
-                    <!-- <img :src="`${props.authNow.attachment.path}${props.authNow.attachment.filename}`" class="rounded-full w-24 h-24" />      -->
+                    <div
+                        class="rounded-full w-24 h-24 bg-cover bg-center"
+                        :style="`background-image:url('${props.authNow.attachment.path}${props.authNow.attachment.filename}')`"
+                    ></div>
                     <div class="ml-3 pl-3">
-                        <p class="leading-8 text-sm">
+                        <p class="text-sm leading-none">
                             {{ props.authNow.name }}
                         </p>
+                        <small class="leading-none"> Tier. {{ tier }} </small>
                         <p class="leading-none text-lg font-semibold">
-                            Poin. {{ point() }}
+                            Poin. {{ props.point }}
                         </p>
                     </div>
                 </div>
@@ -55,7 +58,7 @@
                         <input
                             type=""
                             name=""
-                            class="shadow border border-gray-300 rounded focus:border-gray-500 focus:outline-none py-1 px-2 text-sm block"
+                            class="shadow border border-gray-300 rounded focus:border-gray-500 focus:outline-none py-1 px-2 text-sm block bg-white"
                             @click="openModal"
                             v-model="search"
                             readonly
@@ -75,12 +78,28 @@
                 </div>
             </div>
         </div>
+        <div class="flex justify-center">
+            <input
+                class="input input-bordered w-6/12 my-5 text-center"
+                placeholder="Cari"
+                @click="searchClick"
+                data-theme="light"
+                readonly
+            />
+        </div>
         <div class="pb-32">
             <RowExamRecommendation
                 :recommendationsData="recommendationsData"
                 :favorite="props.favorite"
+                :tier="tier"
+                class="rounded"
             />
-            <RowExam v-for="seconds in props.seconds" :seconds="seconds" />
+            <RowExam
+                v-for="seconds in props.seconds"
+                :seconds="seconds"
+                :tier="tier"
+                class="rounded"
+            />
         </div>
         <Modal :show="isOpen" @closeModal="closeModal" />
         <ModalLink
@@ -95,6 +114,7 @@
             :message="message"
             @closeModal="closeModal"
         />
+        <ModalSearch :show="searchBool" @closeModal="closeModal" />
     </div>
 </template>
 
@@ -106,18 +126,18 @@ import { BookmarksSharp, DocumentTextOutline } from "@vicons/ionicons5";
 import Modal from "@/Components/modal/modal.vue";
 import ModalLink from "@/Components/modal/modalLink.vue";
 import ModalAlert from "@/Components/modal/modalAlert.vue";
+import ModalSearch from "@/Components/modal/modalSearch.vue";
 import RowExam from "@/Components/dashboard/rowExam.vue";
 import RowExamRecommendation from "@/Components/dashboard/RowExamRecommendation.vue";
 
 const props = defineProps({
-    point: Number,
     resultExam: Number,
     favorite: String,
     authNow: Object,
     recommendations: Object,
     seconds: Object,
     ziggy: Object,
-    session: Object,
+    point: Number,
 });
 let form = useForm({
     exam: null,
@@ -158,6 +178,7 @@ const closeModal = (val) => {
     isOpen.value = false;
     isOpenAlert.value = false;
     isOpenLink.value = false;
+    searchBool.value = false;
 };
 function openModal() {
     isOpen.value = true;
@@ -174,6 +195,7 @@ const searchAxios = function () {
         })
         .then(function (val) {
             if (val.data.message == undefined) {
+                link.value = "/dashboard/exam/else/";
                 pending.value = false;
                 link.value = link.value + val.data.id;
                 isOpenLink.value = true;
@@ -185,38 +207,40 @@ const searchAxios = function () {
         });
 };
 
-function point(point) {
-    let result = 0;
-    let examArr = ref([]);
-    for (let k in props.session) {
-        if (examArr.value.includes(props.session[k].exam_id) == false) {
-            examArr.value.push(props.session[k].exam_id);
-            for (let i in props.session[k].history.question) {
-                if (props.session[k].history.question[i].answer == null) {
-                    continue;
-                }
-                for (let j in props.session[k].history.question[i].choice) {
-                    if (
-                        props.session[k].history.question[i].choice[j].choice
-                            .keys != null
-                    ) {
-                        if (
-                            props.session[k].history.question[i].answer
-                                .choice_id ==
-                            props.session[k].history.question[i].choice[j].id
-                        ) {
-                            result =
-                                result +
-                                parseInt(
-                                    props.session[k].history.question[i]
-                                        .question.point.point
-                                );
-                        }
-                    }
-                }
-            }
-        }
+const searchBool = ref(false);
+const rules = ref(false);
+const searchClick = () => {
+    searchBool.value = true;
+};
+let tier = ref("");
+let dateTier = new Date(props.authNow.birth).getFullYear();
+let now = new Date();
+let nowCountSD = now.getFullYear();
+let nowCountSMP = now.getFullYear() - 13;
+let nowCountSMA = now.getFullYear() - 16;
+let nowCountMahasiswa = now.getFullYear() - 17;
+for (let i = 0; i < 13; i++) {
+    nowCountSD--;
+    if (nowCountSD == dateTier) {
+        tier.value = "SD";
+        break;
     }
-    return result;
+}
+for (let i = 0; i < 3; i++) {
+    nowCountSMP--;
+    if (nowCountSMP == dateTier) {
+        tier.value = "SMP";
+        break;
+    }
+}
+for (let i = 0; i < 3; i++) {
+    nowCountSMA--;
+    if (nowCountSMA == dateTier) {
+        tier.value = "SMA";
+        break;
+    }
+}
+if (tier.value.length == 0) {
+    tier.value = "Mahasiswa";
 }
 </script>

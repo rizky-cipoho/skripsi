@@ -1,4 +1,4 @@
-<template>
+<template >
 	<div
 		class="h-screen w-full fixed"
 		v-show="pendingSave"
@@ -50,8 +50,8 @@
 					style="z-index: 9997"
 				/>
 			</div>
-			<div class="md:w-3/12"></div>
-			<Count
+			<div class="md:w-3/12">
+<Count
 				:questions="question"
 				:exam="exam"
 				:problem="problem"
@@ -67,22 +67,28 @@
 				class="max-md:fixed max-md:top-0 max-md:left-0 max-md:w-full max-md:bg-white max-md:h-screen max-md:bg-opacity-90 max-md:py-10 max-md:transition max-md:duration-150 fixed right-0 px-5"
 				style="z-index: 9997"
 			/>
+			</div>
+			
 		</div>
 		<button
-			class="bg-red-600 w-16 h-16 rounded-full text-white font-black fixed bottom-[17%] right-[5%] hover:bg-gray-700 transition duration-150 active:scale-75 md:hidden"
+			class="bg-red-600 w-12 h-12 rounded-full text-white font-black fixed bottom-[15%] right-[5%] hover:bg-gray-700 transition duration-150 active:scale-75 md:hidden flex justify-center items-center hover:-rotate-180 transition duration-300"
 			style="z-index: 9998"
 			@click="choiceMobile = !choiceMobile"
 			:class="{ 'max-md:hidden': countMobile }"
 		>
-			{{ !choiceMobile ? "ABC" : "Tutup" }}
+			<!-- {{ !choiceMobile ? "ABC" : "Tutup" }} -->
+			<AB class="w-8" v-if="!choiceMobile" />
+			<CloseOutline class="w-8" v-else />
 		</button>
 		<button
-			class="bg-red-600 w-16 h-16 rounded-full text-white font-black fixed bottom-[5%] right-[5%] hover:bg-gray-700 transition duration-150 active:scale-75 md:hidden"
+			class="bg-red-600 w-12 h-12 rounded-full text-white font-black fixed bottom-[5%] right-[5%] hover:bg-gray-700 transition duration-150 active:scale-75 md:hidden flex justify-center items-center hover:-rotate-180 transition duration-300"
 			style="z-index: 9998"
 			@click="countMobile = !countMobile"
 			:class="{ 'max-md:hidden': choiceMobile }"
 		>
-			{{ !countMobile ? "No." : "Tutup" }}
+			<!-- {{ !countMobile ? "No." : "Tutup" }} -->
+				<SettingsOutline class="w-8" v-if="!countMobile" />
+			<CloseOutline class="w-8" v-else />
 		</button>
 		<Notification
 			:show="pendingSave"
@@ -112,6 +118,8 @@ import { ChevronLeft } from "@vicons/tabler";
 import Count from "@/Components/question/count.vue";
 import { Head, Link, router } from "@inertiajs/inertia-vue3";
 import { ref, watch } from "vue";
+import { AB } from "@vicons/tabler";
+import { CloseOutline, SettingsOutline } from "@vicons/ionicons5";
 
 const props = defineProps({
 	auth: Object,
@@ -221,7 +229,6 @@ const choiceDataSave = (val) => {
 	choicePending.value = false;
 };
 watch(questionResult, () => {
-	console.log(questionResult.value);
 	pending();
 	setTimeout(() => {
 		axios
@@ -245,7 +252,6 @@ const save = () => {
 	questionTrigger.value++;
 	choiceTrigger.value++;
 	setTimeout(() => {
-		// console.log(questionResult.value);
 	}, 500);
 	questionResult.value = [];
 };

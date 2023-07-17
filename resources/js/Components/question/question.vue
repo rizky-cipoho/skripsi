@@ -3,12 +3,14 @@
 		<div class="flex justify-between items-center mb-5">
 			<p class="font-bold text-lg">Soal {{ props.index + 1 }}</p>
 
-			<Chart
+			<div class="md:w-1/12 max-md:w-2/12">
+				<Chart
 				type="pie"
 				:data="chartData"
 				:options="chartOptions"
-				class="w-1/12"
+				class=""
 			/>
+			</div>
 			<p>Poin. {{ props.question.point.point }}</p>
 		</div>
 		<div
@@ -65,7 +67,6 @@ const props = defineProps({
 	index: Number,
 	session: Object,
 });
-console.log(props.question.choice)
 onMounted(() => {
 	chartData.value = setChartData();
 });

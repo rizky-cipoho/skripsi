@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\exam\else;
+namespace App\Http\Controllers\Exam\Else;
 
 use App\Http\Controllers\Controller;
 use App\Models\Exam;
@@ -40,40 +40,52 @@ class ExamElseController extends Controller
             }
         ])
         ->find($id);
-        $session = Session::where('exam_id', $id)->with([
-            'history'=>function($history){
-                $history->with('user');
-                $history->with('question');
-            }
-        ])->get();
-        $history = collect([]);
-        $temporary = collect([]);
-        $arrValidate = collect([]);
+        $session = Session::where('exam_id', $id)->with('user')->get();
+        $result = collect([]);
         foreach($session as $data){
-            if (!$arrValidate->contains($data->history->user->id)){
-                $history->push($data);
-                $arrValidate->push($data->history->user->id);
-            }
-        }
-        // $history->sortBy('point')->reverse();
-        foreach($history->sortBy('point')->reverse() as $data){
-            $temporary->push($data->id);
-        }
-        $sessionResult = collect([]);
-        foreach($temporary as $data){
             $sessionTemporary = Session::with([
                 'history'=>function($history){
                     $history->with('user');
-                    $history->with('question');
+                    $history->with([
+                        'question'=> function($question){
+                            $question->with('answer');
+                            $question->with([
+                                'choice'=>function($choiceHistory){
+                                    $choiceHistory->with([
+                                        'choice'=>function($choice){
+                                            $choice->with('keys');
+                                        }
+                                    ]);
+                                }
+                            ]);
+                            $question->with([
+                                'question'=>function($q){
+                                    $q->with('point');
+                                }
+                            ]);
+                        }
+                    ]);
                 }
-            ])->find($data);
-            $sessionResult->push($sessionTemporary);
+            ])->find($data->id);
+            $point = 0;
+            foreach($sessionTemporary->history->question as $question){
+                if ($question->answer != null) {
+                    foreach($question->choice as $choice){
+                        if ($choice->choice->keys != null) {
+                            if ($choice->id == $question->answer->choice_id) {
+                                $point = $point + (int)$question->question->point->point;
+                            }
+                        }
+                    }
+                }
+            }
+            $result->push(['data'=>$data, 'point'=>$point, 'user_id' => $data->user_id]);
         }
-        // dd($sessionResult);
+        // $result->sortBy('point');
         $auth = User::find(Auth::user()->id);
         return Inertia::render('exam/examElse/index',[
             'exam'=>$exam,
-            'history'=>$sessionResult,
+            'history'=>$result->unique('user_id')->sortBy('point')->reverse(),
             'problem'=>$this->examNotReady($id)
         ]);
     }
@@ -191,72 +203,73 @@ class ExamElseController extends Controller
         $session = Session::where('token', $token)->first();
         if ($session->over != 'over') {
             $tokenOver = Session::where('token', $token)->update([
-            'over'=>'over'
-        ]);
-        $tokenData = $this->dataToken($id, $token);
+                'over'=>'over'
+            ]);
+            $tokenData = $this->dataToken($id, $token);
 
-        $historyExam = History::where('exam_id', $session->exam_id)->get();
-        $examCount = $historyExam->count();
-        $pointExam = 0;
-        $true = 0;
-        foreach($tokenData->history->question as $data){
-            $question = Question::find($data->question->id); 
-            $point = Point::where('question_id', $question->id)->first(); 
-            if ($data->answer != null) {
-                foreach($data->choice as $choice){
-                    if ($choice->choice->keys != null) {
-                        if ($data->answer->choice_id == $choice->id) {
-                            $true++;
-                            $result = Result::create([
-                                'question_id'=>$data->question_id,
-                                'exam_id'=>$session->exam_id,
-                                'user_id'=>Auth::user()->id,
-                                'session_id'=>$session->id,
-                                'truth'=>'true',
-                            ]);
-                        }else{
-                            $result = Result::create([
-                                'question_id'=>$data->question_id,
-                                'exam_id'=>$session->exam_id,
-                                'user_id'=>Auth::user()->id,
-                                'session_id'=>$session->id,
-                                'truth'=>null,
-                            ]);
+            $historyExam = History::where('exam_id', $session->exam_id)->get();
+            $collect = collect([...$historyExam])->unique('user_id');
+            $examCount = $collect->count();
+            $pointExam = 0;
+            $true = 0;
+            foreach($tokenData->history->question as $data){
+                $question = Question::find($data->question->id); 
+                $point = Point::where('question_id', $question->id)->first(); 
+                if ($data->answer != null) {
+                    foreach($data->choice as $choice){
+                        if ($choice->choice->keys != null) {
+                            if ($data->answer->choice_id == $choice->id) {
+                                $true++;
+                                $result = Result::create([
+                                    'question_id'=>$data->question_id,
+                                    'exam_id'=>$session->exam_id,
+                                    'user_id'=>Auth::user()->id,
+                                    'session_id'=>$session->id,
+                                    'truth'=>'true',
+                                ]);
+                            }else{
+                                $result = Result::create([
+                                    'question_id'=>$data->question_id,
+                                    'exam_id'=>$session->exam_id,
+                                    'user_id'=>Auth::user()->id,
+                                    'session_id'=>$session->id,
+                                    'truth'=>null,
+                                ]);
+                            }
                         }
                     }
+
+                }else{
+                    $result = Result::create([
+                        'question_id'=>$data->question_id,
+                        'exam_id'=>$session->exam_id,
+                        'user_id'=>Auth::user()->id,
+                        'session_id'=>$session->id,
+                        'truth'=>null,
+                    ]);
                 }
 
-            }else{
-                $result = Result::create([
-                    'question_id'=>$data->question_id,
-                    'exam_id'=>$session->exam_id,
-                    'user_id'=>Auth::user()->id,
-                    'session_id'=>$session->id,
-                    'truth'=>null,
-                ]);
-            }
-            
 
-            $historyValidate = History::where('user_id', Auth::user()->id)->where('exam_id', $session->exam_id)->get();
+                $historyValidate = History::where('user_id', Auth::user()->id)->where('exam_id', $session->exam_id)->get();
             // dd($historyValidate);
-            if ($historyValidate->count() == 1) {
-                if ($examCount >= 1) {
+                if ($historyValidate->count() == 1) {
+                    if ($examCount >= 1) {
 
-                    $countTrue = collect([]);
-                    $countFalse = collect([]);
+                        $countTrue = collect([]);
+                        $countFalse = collect([]);
 
-                    $questionResult = Result::where('question_id', $data->question->id)->get();
-                    foreach($questionResult as $unitGenerale){
-                        if ($unitGenerale->truth == 'true') {
-                            $countTrue->push($unitGenerale);
-                        }else{
-                            $countFalse->push($unitGenerale);
+                        $questionResult = Result::where('question_id', $data->question->id)->get();
+                        foreach($questionResult as $unitGenerale){
+                            if ($unitGenerale->truth == 'true') {
+                                $countTrue->push($unitGenerale);
+                            }else{
+                                $countFalse->push($unitGenerale);
+                            }
                         }
-                    }
-                    $pointNow = 0;
+                        $pointNow = 0;
 
-                    $calculationResult = $countTrue->count() + $countFalse->count();
-                    $calculation = ($countTrue->count()/$calculationResult)*100;
+                        $calculationResult = $countTrue->count() + $countFalse->count();
+                        $calculation = ($countTrue->count()/$calculationResult)*100;
 
                     // dump($calculation);
                     // dump("ini calculation");
@@ -269,30 +282,31 @@ class ExamElseController extends Controller
                     // dump($c);
                     // dump("ini c");
 
-                    if (80 <= $calculation) {
-                        $pointNow = 1;
-                    }else if (60 <= $calculation) {
-                        $pointNow = 5;
-                    }else if (40 <= $calculation) {
-                        $pointNow = 10;
-                    }else if (20 <= $calculation) {
-                        $pointNow = 15;
-                    }else if(20 > $calculation) {
-                        $pointNow = 20;
-                    }
+                        if (80 <= $calculation) {
+                            $pointNow = 1;
+                        }else if (60 <= $calculation) {
+                            $pointNow = 5;
+                        }else if (40 <= $calculation) {
+                            $pointNow = 10;
+                        }else if (20 <= $calculation) {
+                            $pointNow = 15;
+                        }else if(20 > $calculation) {
+                            $pointNow = 20;
+                        }
 
-                    $pointChange = $point->update([
-                        'point'=>$pointNow
-                    ]);
-                }               
+                        $pointChange = $point->update([
+                            'point'=>$pointNow
+                        ]);
+                    }               
+                }
             }
+
+            $rate = ($true * 100)/($tokenData->history->question->count());
+            $session->update([
+                'rate'=>$rate
+            ]);
         }
 
-        $rate = ($true * 100)/($tokenData->history->exam->question->count());
-        $session->update([
-            'rate'=>$rate
-        ]);
-        }
         return redirect()->route('result', [
             'id'=>$id,
             'token'=>$session->token
@@ -532,7 +546,7 @@ class ExamElseController extends Controller
         $lcgCollection = collect([...$dataSession->exam->question]); 
         $lcgCollectionSeriesArr = collect([]); 
         $series = collect([]);
-        $countLength = 5;
+        $countLength = 10;
         foreach($lcgCollection as $key=>$data){
             $series->push($data);
             if ($series->count() == $countLength) {
@@ -593,7 +607,7 @@ class ExamElseController extends Controller
 
         for ($i=0; $i < $count; $i++) { 
             if($i==0){
-                $xn = (1*$year+7)%$count;
+                $xn = (1*2000+7)%$count;
                 $arrLCG->push($xn);
             }else{
                 $xn = (1*$xn+7)%$count;
@@ -606,7 +620,7 @@ class ExamElseController extends Controller
             foreach ($data as $i=>$dataQuestion) {
                 $choiceTemporary = collect([]);
                 if($i==0){
-                    $xnQuestion = (1*4+7)%$data->count();
+                    $xnQuestion = (1*$month+7)%$data->count();
                     foreach($dataQuestion->choice as $keyChoice=>$dataChoice){
                         if($keyChoice == 0){
                             $xnChoice = (1*$date+7)%$dataQuestion->choice->count();
@@ -633,10 +647,9 @@ class ExamElseController extends Controller
             }
             $question->push($questionTemporary);
         }
-        // dd($question);
 
         foreach($arrLCG as $keyLCG=>$LCG){
-            $result->push([$LCG,$question[$keyLCG]]);
+            $result->push([$LCG,$question[$LCG]]);
         }
 
         return $result;
@@ -696,11 +709,12 @@ class ExamElseController extends Controller
             $arrQuestion->push($questionTemporary);
         }
         foreach($arrCollect as $keyFisher=>$fisherYates){
-            $result->push([$fisherYates,$arrQuestion[$fisherYates]]);
+            $result->push([$fisherYates, $arrQuestion[$fisherYates]]);
         }
         return $result;
     }  
     public function generateData($arr, $datas, $length){
+        // dd($arr);
         $arrData = collect([]);
         $questionTemporary = collect([]);
 
@@ -743,7 +757,6 @@ class ExamElseController extends Controller
 
         for($i = 0; $i < $questionTemporary->count(); $i++){
             $count = $arr[$i][0];
-
             $arrData->push($questionTemporary[$count]);
         }
 

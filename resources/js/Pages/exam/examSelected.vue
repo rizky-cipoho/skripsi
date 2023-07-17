@@ -1,5 +1,6 @@
 <template>
-	<Navbar
+	<div class="bg-white text-black">
+		<Navbar
 		:user="props.auth.user"
 		:ziggy="props.ziggy"
 		:examSelected="examSelected"
@@ -33,15 +34,16 @@
 							<input
 								type="file"
 								name=""
-								class="cursor-pointer opacity-0 pb-2 pt-1 w-36 bg-black absolute"
+								class="cursor-pointer opacity-0 pb-2 pt-1 w-36 bg-black absolute bg-white"
 								accept="image/png, image/gif, image/jpeg"
+								data-theme="light"
 								@change="imageExam"
 							/>
 							<p class="py-2">Ganti Gambar</p>
 						</button>
 					</div>
 
-					<div class="px-5 md:w-10/12">
+					<div class="md:px-5 md:w-10/12 max-md:w-full">
 						<div class="flex items-center w-full">
 							<div class="max-w-64">
 								<p
@@ -167,12 +169,14 @@
 						</div>
 					</div>
 					<div class="flex justify-center">
-						<Chart
+						<div class="w-3/12">
+							<Chart
 							type="pie"
 							:data="chartData"
 							:options="chartOptions"
-							class="w-3/12"
+							class=""
 						/>
+						</div>
 					</div>
 				</div>
 			</div>
@@ -202,9 +206,10 @@
 									type="radio"
 									:id="lesson.id"
 									name="lesson"
-									class="w-6 cursor-pointer radio radio-error"
+									class="w-6 cursor-pointer radio radio-error bg-white"
 									:value="lesson.id"
 									v-model="selected"
+									data-theme="light"
 									@change="selectedLesson"
 								/>
 								<label
@@ -221,10 +226,11 @@
 								type="radio"
 								:id="props.lessonOther.id"
 								name="lesson"
-								class="w-6 cursor-pointer radio radio-error"
+								class="w-6 cursor-pointer radio radio-error bg-white"
 								:value="props.lessonOther.id"
 								@change="selectedLesson"
 								v-model="selected"
+								data-theme="light"
 							/>
 							<label
 								class="px-2 w-full py-2 cursor-pointer text-left select-none"
@@ -234,10 +240,11 @@
 							<input
 								type=""
 								name=""
-								class="w-36 border-b-2 border-gray-700 active:border-0 focus:border-0 rounded"
+								class="w-36 border border-gray-300 active:border-0 focus:border-0 rounded bg-white"
 								@click="examlessonChange = !examlessonChange"
 								v-model="other"
 								readonly
+								data-theme="light"
 							/>
 						</div>
 					</form>
@@ -250,10 +257,12 @@
 						:key="index"
 					>
 						<input
-							class="radio radio-error w-6"
+							class="radio radio-error w-6 bg-white"
 							type="radio"
 							name="tier"
 							:value="tier"
+		data-theme="light"
+
 							v-model="tierModel"
 						/>
 						<p class="w-10/12">Tingkat {{ tier }}</p>
@@ -267,10 +276,11 @@
 						:key="index"
 					>
 						<input
-							class="radio radio-error w-6"
+							class="radio radio-error w-6 bg-white"
 							type="radio"
 							name="duration"
 							:value="duration"
+							data-theme="light"
 							v-model="durationTime"
 						/>
 						<label class="w-10/12">{{ duration }} Menit</label>
@@ -286,7 +296,8 @@
 								:value="minimumModel"
 								@input="inputNumberAbs"
 								v-debounce:300="submitMinimum"
-								class="w-10 border border-gray-300 rounded text-center"
+								data-theme="light"
+								class="w-10 border border-gray-300 rounded text-center bg-white"
 								name=""
 							/>
 						</p>
@@ -296,23 +307,25 @@
 					</div>
 				</div>
 				<div class="mt-3">
-					<p class="font-bold text-lg">Jam mulai ujian</p>
+					<p class="font-bold text-lg">Waktu mulai ujian</p>
 					<input
-						class="checkbox"
+						class="checkbox bg-white"
 						type="checkbox"
 						id="start"
+						data-theme="light"
 						:checked="startExamCheckBox"
 						v-model="startExamCheckBox"
 					/>
-					<label class="px-2" for="start">Pakai Jam Mulai?</label>
+					<label class="px-2" for="start">Gunakan</label>
 					<div
 						class="flex justify-center py-2"
 						v-if="examData.time.start != null"
 					>
 						<input
-							class=""
+							class="bg-white input input-bordered text-center"
 							type="datetime-local"
 							:value="timeStart"
+							data-theme="light"
 							@change="dateTime"
 						/>
 					</div>
@@ -321,8 +334,9 @@
 					<p class="font-bold text-lg">Kunci ujian</p>
 					<div>
 						<input
-							class="input border border-gray-300 text-center h-[2rem]"
+							class="input border border-gray-300 text-center h-[2rem] bg-white"
 							name=""
+							data-theme="light"
 							v-model="key"
 							readonly
 							@click="keyModal = !keyModal"
@@ -337,6 +351,7 @@
 		@changeInput="changeExam"
 		@closeModal="closeModal"
 		:pending="examNamePending"
+		data-theme="light"
 		:input="examName"
 		:title="'Ubah Nama Ujian'"
 	/>
@@ -346,6 +361,7 @@
 		@closeModal="closeModal"
 		:pending="examDescriptionPending"
 		:input="examDescription"
+		data-theme="light"
 		:title="'Ubah Deskripsi Ujian'"
 	/>
 	<ModalExamChange
@@ -353,17 +369,23 @@
 		@changeInput="selectedLesson"
 		@closeModal="closeModal"
 		:pending="selectedLessonPending"
+		data-theme="light"
+
 		:input="other"
 		:title="'Pelajaran Lainnya'"
 	/>
 	<ModalRemove
 		:show="modalRemove"
 		@accept="acceptRemove"
+		data-theme="light"
+
 		@decline="closeModal"
 	/>
 	<ModalExamChange
 		:show="keyModal"
 		@changeInput="keySave"
+		data-theme="light"
+
 		@closeModal="closeModal"
 		:pending="keyPending"
 		:input="key"
@@ -373,6 +395,8 @@
 		<Notification
 			:show="notification"
 			:sign="'checklist'"
+		data-theme="light"
+
 			:text="text"
 			@notification="notificationStatus"
 		/>
@@ -388,6 +412,7 @@
 			@notification="notificationStatus"
 		/>
 	</Transition>
+	</div>
 </template>
 <script setup>
 import Navbar from "@/Components/navbar.vue";
@@ -411,7 +436,7 @@ import {
 	CloseOutline,
 } from "@vicons/ionicons5";
 import { ref, watch, onMounted, onUpdated } from "vue";
-import Chart from "primevue/chart";
+import Chart from 'primevue/chart';
 import { ExclamationMark } from "@vicons/tabler";
 const props = defineProps({
 	auth: Object,
@@ -513,7 +538,6 @@ const changeExam = (val) => {
 			},
 		})
 		.then((result) => {
-			console.log(examData.value);
 			examNamePending.value = false;
 			examNameChange.value = false;
 			examData.value = null;

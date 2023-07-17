@@ -31,15 +31,41 @@
 					}}</span>
 				</div>
 			</div>
+			<div
+				class="alert alert-error shadow-lg mb-5"
+				v-if="
+					props.exam.remove == 'remove'
+				"
+			>
+				<div>
+					<svg
+						xmlns="http://www.w3.org/2000/svg"
+						class="stroke-current flex-shrink-0 h-6 w-6"
+						fill="none"
+						viewBox="0 0 24 24"
+					>
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+							d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
+						/>
+					</svg>
+					<span>
+							Ujian ini Telah di Hapus
+					</span>
+				</div>
+			</div>
+
 			<h1 class="text-2xl pb-5 font-semibold px-10 text-center">
 				Informasi Ujian
 			</h1>
 			<div class="md:flex md:justify-center">
 				<div class="md:w-6/12">
-					<div class="shadow border border-gray-10 rounded h-fit">
-						<div class="flex grid grid-cols-3 w-full">
+					<div class="md:shadow md:border md:border-gray-10 rounded h-fit">
+						<div class="md:flex md:grid md:grid-cols-3 w-full">
 							<div
-								class="flex justify-center items-center border-r"
+								class="flex justify-center items-center md:border-r max-md:border-b-2"
 							>
 								<div class="py-10 text-center">
 									<div class="flex justify-center">
@@ -54,7 +80,7 @@
 								</div>
 							</div>
 							<div
-								class="flex justify-center items-center border-r"
+								class="flex justify-center items-center md:border-r max-md:border-b-2"
 							>
 								<div class="py-10 px-10 text-center">
 									<div class="flex justify-center">
@@ -94,7 +120,6 @@
 							</div>
 						</div>
 					</div>
-					<!-- <a :href="route('createSession', props.exam.id)"> -->
 					<button
 						class="bg-red-600 text-white py-3 mt-4 px-2 rounded font-semibold hover:bg-gray-700 focus:outline-none tracking-widest active:bg-gray-900 focus:shadow-outline-gray transition ease-in-out duration-150 mb-1 w-full text-center max-md:hidden"
 
@@ -115,7 +140,7 @@
 						class="overflow-y-auto border mt-5 max-md:hidden"
 						v-if="props.history.length != 0"
 					>
-						<table class="table table-zebra w-full z-[-1]">
+						<table class="table table-zebra w-full">
 							<tr
 								v-for="(history, index) in props.history"
 								:class="{ hidden: index >= 10 }"
@@ -140,7 +165,7 @@
 										"
 									></div>
 								</td>
-								<td>{{ history.history.user.name }}</td>
+								<td>{{ history.data.user.name }}</td>
 								<td>Point. {{ history.point }}</td>
 							</tr>
 						</table>
@@ -151,6 +176,13 @@
 					<p>
 						{{ props.exam.exam }}
 					</p>
+					<div class="border-b-2 pb-3 mb-3 border-red-400"></div>
+					<div>
+						<p class="pt-1 font-semibold">Kode Ujian</p>
+						<small>
+							{{ props.exam.uni_code }}
+						</small>
+					</div>
 					<div class="border-b-2 pb-3 mb-3 border-red-400"></div>
 					<div>
 						<p class="pt-1 font-semibold">Deskripsi Ujian</p>
@@ -167,6 +199,7 @@
 						</small>
 					</div>
 					<div class="border-b-2 pb-3 mb-3 border-red-400"></div>
+
 					<div>
 						<p class="pt-1 font-semibold">Tingkat Ujian</p>
 						<small>
@@ -232,8 +265,7 @@
 					<small
 						>Ujian Butuh Kunci:
 						{{ props.exam.key ? "Ya" : "Tidak" }}</small
-					><br />
-					<small>Untuk Instansi: Tidak</small>
+					>
 				</div>
 				<button
 						class="bg-red-600 text-white py-3 mt-4 px-2 rounded font-semibold hover:bg-gray-700 focus:outline-none tracking-widest active:bg-gray-900 focus:shadow-outline-gray transition ease-in-out duration-150 mb-1 w-full text-center md:hidden"
@@ -254,7 +286,7 @@
 						class="overflow-y-auto border mt-5 md:hidden"
 						v-if="props.history.length != 0"
 					>
-						<table class="table table-zebra w-full z-[-1]">
+						<table class="table table-zebra w-full">
 							<tr
 								v-for="(history, index) in props.history"
 								:class="{ hidden: index >= 10 }"
@@ -279,7 +311,7 @@
 										"
 									></div>
 								</td>
-								<td>{{ history.history.user.name }}</td>
+								<td>{{ history.data.user.name }}</td>
 								<td>Point. {{ history.point }}</td>
 							</tr>
 						</table>
@@ -326,7 +358,7 @@ const props = defineProps({
 	history: Object,
 	notification: String,
 });
-console.log(props.auth);
+console.log(props.exam.remove);
 const key = ref("");
 const keyModal = ref(false);
 const keyPending = ref(false);
@@ -361,7 +393,7 @@ watch(notification, () => {
 	}
 });
 const examReady = ref(true);
-const examReadyResult = ref(true);
+const examReadyResult = ref(props.exam.remove != 'remove' ? true : false);
 const yearDB = ref("");
 const monthDB = ref("");
 const dateDB = ref("");
@@ -403,24 +435,20 @@ if (props.exam.time.start != null) {
 			if (overMilis.value < dateNow.value) {
 				clearInterval(looping);
 			}
-			// console.log(overMilis.value);
 		}, 1000);
 	}
-	// console.log(props.problem);
 }
 watch(
 	examReadyResult,
 	() => {
 		if (props.problem.length != 0) {
 			examReadyResult.value = false;
-			console.log("asdsa");
 		}
-		console.log(examReadyResult.value);
 	},
 	{ immediate: true }
 );
 const ready = () => {
 	return props.problem.length == 0 && examReady.value == true;
 };
-const rules = ref(true);
+const rules = ref(props.exam.remove != 'remove' ? true : false);
 </script>

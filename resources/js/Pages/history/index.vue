@@ -1,12 +1,13 @@
 <template>
-	<Navbar :user="props.auth.user" :ziggy="props.ziggy" />
+	<div class="bg-white text-black">
+		<Navbar :user="props.auth.user" :ziggy="props.ziggy" />
 	<div
-		class="flex justify-center px-20 py-10 z-50"
+		class="flex justify-center md:px-20 max-md:px-5 py-10 z-50"
 		v-if="props.session.length != 0"
 	>
-		<div class="overflow-x-auto w-full">
+		<div class="overflow-x-auto w-full ">
 			<!-- <pre>{{ sessionNow }}</pre> -->
-			<table class="table w-full">
+			<table class="table w-full bg-white text-black" data-theme="light">
 				<!-- head -->
 				<thead>
 					<tr class="text-center bg-red-700">
@@ -118,6 +119,7 @@
 			Tidak ada History
 		</div>
 	</div>
+	</div>
 </template>
 <script type="text/javascript" setup>
 import Navbar from "@/Components/navbar.vue";
@@ -144,15 +146,11 @@ onBeforeMount(() => {
 		});
 	}
 	sessionNow.value.reverse();
-	// console.log(sessionNow.value);
 
 });
-	console.log(props.session)
-	console.log("props")
 
 function point(arr) {
 	let result = 0;
-	console.log(arr)
 
 	let point = arr.question;
 	if (array.value.includes(arr.exam_id) == false) {
@@ -176,5 +174,4 @@ function point(arr) {
 
 	return result;
 }
-// console.log(sessionData.value)
 </script>

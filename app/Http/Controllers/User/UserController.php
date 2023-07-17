@@ -50,9 +50,29 @@ class UserController extends Controller
             }
         ])->where('user_id', Auth::user()->id)->get();
         $user = User::with('attachment')->find(Auth::user()->id);
+        $result = 0;
+        $examArr = collect([]);
+        foreach($session as $unit){
+            if ($examArr->contains($unit->exam_id) == false) {
+                $examArr->push($unit->exam_id);
+                foreach($unit->history->question as $question){
+                    if ($question->answer == null) {
+                        continue;
+                    }
+                    foreach($question->choice as $choice){
+                        if ($choice->choice->keys != null) {
+                            if ($question->answer->choice_id == $choice->id) {
+                                $result = $result + (int)$question->question->point->point;
+                            }
+                        }
+                    }
+                }
+            }
+        }
         return Inertia::render('User/setting',[
             'session'=>$session,
-            'user'=>$user
+            'user'=>$user,
+            'point'=>$result
         ]);
     }
     public function settingName(Request $request){

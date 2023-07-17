@@ -133,9 +133,7 @@ defineProps({
     alert: String,
 });
 const page = usePage();
-console.log(page.props.value.flash != undefined);
 const user = computed(() => page.props.auth.user);
-// console.log(page.props.)
 const title = "Login";
 const form = useForm({
     username: "",

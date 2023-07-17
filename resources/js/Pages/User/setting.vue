@@ -1,7 +1,7 @@
 <template>
 	<Navbar :user="props.auth.user" :ziggy="props.ziggy" />
-	<div class="flex justify-center p-20">
-		<div class="flex justify-center md:w-8/12 max-md:w-11/12">
+	<div class="flex justify-center max-md:px-5 max-md:py-20 p-20">
+		<div class="flex justify-center md:w-8/12 max-md:w-full">
 			<div class="md:flex bg-gray-100 border p-5 rounded w-full">
 				<div>
 					<div
@@ -24,6 +24,7 @@
 				<div class="pl-5 w-full">
 					<div class="flex items-center max-md:py-2">
 						<strong class="md:text-xl max-md:text-lg">{{ name }}</strong>
+						
 						<div>
 							<CreateOutline
 								class="w-4 h-4 ml-5 cursor-pointer text-red-600 hover:text-gray-700 active:scale-75"
@@ -31,6 +32,8 @@
 							/>
 						</div>
 					</div>
+						<small class="">({{ date }})</small>
+
 					<div class="py-4 md:flex md:grid md:grid-cols-2 w-full">
 						<div class="mr-6">
 							<div class="flex items-center">
@@ -58,7 +61,7 @@
 						<div>
 							<div class="flex items-center">
 								<SchoolOutline class="w-5 h-5 text-red-600" />
-								<p class="px-2">Poin. {{ point() }}</p>
+								<p class="px-2">Poin. {{ props.point }}</p>
 							</div>
 							<!-- 							<div class="flex items-center">
 								<SchoolOutline class="w-5 h-5 text-red-600" />
@@ -138,8 +141,8 @@ const props = defineProps({
 	ziggy: Object,
 	session: Object,
 	user: Object,
+	point: Number,
 });
-console.log(props.user)
 let user = ref(props.auth.user);
 let showName = ref(false);
 let showSchool = ref(false);
@@ -171,7 +174,6 @@ function changeSchool(val) {
 			school: val,
 		})
 		.then((output) => {
-			console.log(output);
 			school.value = output.data;
 			pending.value = false;
 			closeModal();
@@ -194,40 +196,6 @@ function closeModal() {
 	showSchool.value = false;
 	showDescription.value = false;
 }
-function point(point) {
-	let result = 0;
-	let examArr = ref([]);
-	for (let k in props.session) {
-		if (examArr.value.includes(props.session[k].exam_id) == false) {
-			examArr.value.push(props.session[k].exam_id);
-			for (let i in props.session[k].history.question) {
-				if (props.session[k].history.question[i].answer == null) {
-					continue;
-				}
-				for (let j in props.session[k].history.question[i].choice) {
-					if (
-						props.session[k].history.question[i].choice[j].choice
-							.keys != null
-					) {
-						if (
-							props.session[k].history.question[i].answer
-								.choice_id ==
-							props.session[k].history.question[i].choice[j].id
-						) {
-							result =
-								result +
-								parseInt(
-									props.session[k].history.question[i]
-										.question.point.point
-								);
-						}
-					}
-				}
-			}
-		}
-	}
-	return result;
-}
 const imageExam = (e) => {
 	pending.value = true;
 	const url = URL.createObjectURL(e.target.files[0]);
@@ -241,9 +209,11 @@ const imageExam = (e) => {
 			},
 		})
 		.then((output) => {
-			// console.log(output);
 			image.value = output.data.user.attachment.path+output.data.user.attachment.filename
 			pending.value = false;
 		});
 };
+const date = ref("");
+const d = new Date(props.auth.user.birth);
+date.value = `${d.getDate()} - ${d.getMonth()} - ${d.getFullYear()}`;
 </script>
